@@ -49,7 +49,7 @@ If you're ready to write some code, here is the basic workflow:
 1.  **Fork** the repository.
 2.  **Create a new branch** for your feature or bugfix (e.g., `git checkout -b feat/add-pentatonic-scale`).
 3.  **Make your changes.** Please follow the existing code style and add comments where necessary.
-4.  **Test your changes** to make sure they work and don't break existing functionality.
+4.  **Test your changes.** Run the existing test suite with `cargo test`. If you are adding a new feature or fixing a bug, please add new tests to cover your changes.
 5.  **Commit** your changes with a clear commit message.
 6.  **Push** your branch to your fork.
 7.  **Open a Pull Request** (PR) against the `main` branch of the `airvzxf/music-theory-calculator` repository.
