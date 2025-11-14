@@ -169,31 +169,31 @@ impl ScaleType {
     pub fn intervals(&self) -> &'static [Interval] {
         match self {
             ScaleType::Major => &[
-                Interval::Unison,       // 1
-                Interval::MajorSecond,  // 2
-                Interval::MajorThird,   // 3
+                Interval::Unison,        // 1
+                Interval::MajorSecond,   // 2
+                Interval::MajorThird,    // 3
                 Interval::PerfectFourth, // 4
                 Interval::PerfectFifth,  // 5
-                Interval::MajorSixth,   // 6
-                Interval::MajorSeventh, // 7
+                Interval::MajorSixth,    // 6
+                Interval::MajorSeventh,  // 7
             ],
             ScaleType::MinorNatural => &[
-                Interval::Unison,       // 1
-                Interval::MajorSecond,  // 2
-                Interval::MinorThird,   // b3
+                Interval::Unison,        // 1
+                Interval::MajorSecond,   // 2
+                Interval::MinorThird,    // b3
                 Interval::PerfectFourth, // 4
                 Interval::PerfectFifth,  // 5
-                Interval::MinorSixth,   // b6
-                Interval::MinorSeventh, // b7
+                Interval::MinorSixth,    // b6
+                Interval::MinorSeventh,  // b7
             ],
             ScaleType::MinorHarmonic => &[
-                Interval::Unison,       // 1
-                Interval::MajorSecond,  // 2
-                Interval::MinorThird,   // b3
+                Interval::Unison,        // 1
+                Interval::MajorSecond,   // 2
+                Interval::MinorThird,    // b3
                 Interval::PerfectFourth, // 4
                 Interval::PerfectFifth,  // 5
-                Interval::MinorSixth,   // b6
-                Interval::MajorSeventh, // 7 (The raised 7th)
+                Interval::MinorSixth,    // b6
+                Interval::MajorSeventh,  // 7 (The raised 7th)
             ],
         }
     }
@@ -238,14 +238,14 @@ impl ChordType {
                 Interval::PerfectFifth, // 5
             ],
             ChordType::Diminished => &[
-                Interval::Unison,       // 1
-                Interval::MinorThird,   // b3
-                Interval::Tritone,      // b5
+                Interval::Unison,     // 1
+                Interval::MinorThird, // b3
+                Interval::Tritone,    // b5
             ],
             ChordType::Augmented => &[
-                Interval::Unison,       // 1
-                Interval::MajorThird,   // 3
-                Interval::MinorSixth,   // #5 (or AugFifth)
+                Interval::Unison,     // 1
+                Interval::MajorThird, // 3
+                Interval::MinorSixth, // #5 (or AugFifth)
             ],
         }
     }
@@ -359,14 +359,30 @@ mod tests {
     #[test]
     fn test_lib_build_scale_c_major() {
         let scale = build_scale(Note::C, ScaleType::Major);
-        let expected = vec![Note::C, Note::D, Note::E, Note::F, Note::G, Note::A, Note::B];
+        let expected = vec![
+            Note::C,
+            Note::D,
+            Note::E,
+            Note::F,
+            Note::G,
+            Note::A,
+            Note::B,
+        ];
         assert_eq!(scale, expected);
     }
 
     #[test]
     fn test_lib_build_scale_a_harmonic_minor() {
         let scale = build_scale(Note::A, ScaleType::MinorHarmonic);
-        let expected = vec![Note::A, Note::B, Note::C, Note::D, Note::E, Note::F, Note::GSharp];
+        let expected = vec![
+            Note::A,
+            Note::B,
+            Note::C,
+            Note::D,
+            Note::E,
+            Note::F,
+            Note::GSharp,
+        ];
         assert_eq!(scale, expected);
     }
 
@@ -393,7 +409,10 @@ mod tests {
         let fifth_interval = (Note::E.as_u8() + 12 - Note::A.as_u8()) % 12;
         assert_eq!(third_interval, 3);
         assert_eq!(fifth_interval, 7);
-        assert_eq!(ChordType::from_intervals(third_interval, fifth_interval), ChordType::Minor);
+        assert_eq!(
+            ChordType::from_intervals(third_interval, fifth_interval),
+            ChordType::Minor
+        );
 
         // Test the logic (Diminished)
         // B (11) -> D (2) = 3 semitones
@@ -402,7 +421,10 @@ mod tests {
         let fifth_interval_b = (Note::F.as_u8() + 12 - Note::B.as_u8()) % 12;
         assert_eq!(third_interval_b, 3);
         assert_eq!(fifth_interval_b, 6);
-        assert_eq!(ChordType::from_intervals(third_interval_b, fifth_interval_b), ChordType::Diminished);
+        assert_eq!(
+            ChordType::from_intervals(third_interval_b, fifth_interval_b),
+            ChordType::Diminished
+        );
     }
 
     #[test]

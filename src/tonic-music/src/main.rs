@@ -27,7 +27,7 @@
 
 use clap::Parser;
 // Import our library's functions and structs
-use tonic_music::{build_chord, build_scale, harmonize_scale, ChordType};
+use tonic_music::{ChordType, build_chord, build_scale, harmonize_scale};
 
 // Declare the new parser.rs module
 mod parser;
@@ -88,11 +88,7 @@ fn main() {
                 // Format: e.g., "I (C): C Major -> [C, E, G]"
                 println!(
                     "{} ({:?}):\t{:?} {} \t-> {:?}",
-                    degree_name,
-                    degree.root_note,
-                    degree.root_note,
-                    quality,
-                    degree.notes
+                    degree_name, degree.root_note, degree.root_note, quality, degree.notes
                 );
             }
         }
