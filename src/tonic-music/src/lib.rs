@@ -339,3 +339,110 @@ pub fn harmonize_scale(scale: &[Note]) -> Vec<HarmonizedDegree> {
 
     harmonized_scale
 }
+
+#[cfg(test)]
+mod tests {
+    // We import everything from the parent module (our lib.rs)
+    use super::*;
+
+    #[test]
+    fn test_lib_transpose_simple() {
+        assert_eq!(transpose(Note::C, Interval::PerfectFifth), Note::G);
+    }
+
+    #[test]
+    fn test_lib_transpose_wrap_around() {
+        // A (9) + MajorThird (4) = 13. 13 % 12 = 1 (CSharp)
+        assert_eq!(transpose(Note::A, Interval::MajorThird), Note::CSharp);
+    }
+
+    #[test]
+    fn test_lib_build_scale_c_major() {
+        let scale = build_scale(Note::C, ScaleType::Major);
+        let expected = vec![Note::C, Note::D, Note::E, Note::F, Note::G, Note::A, Note::B];
+        assert_eq!(scale, expected);
+    }
+
+    #[test]
+    fn test_lib_build_scale_a_harmonic_minor() {
+        let scale = build_scale(Note::A, ScaleType::MinorHarmonic);
+        let expected = vec![Note::A, Note::B, Note::C, Note::D, Note::E, Note::F, Note::GSharp];
+        assert_eq!(scale, expected);
+    }
+
+    #[test]
+    fn test_lib_build_chord_a_minor() {
+        let chord = build_chord(Note::A, ChordType::Minor);
+        let expected = vec![Note::A, Note::C, Note::E];
+        assert_eq!(chord, expected);
+    }
+
+    #[test]
+    fn test_lib_build_chord_b_diminished() {
+        let chord = build_chord(Note::B, ChordType::Diminished);
+        let expected = vec![Note::B, Note::D, Note::F];
+        assert_eq!(chord, expected);
+    }
+
+    #[test]
+    fn test_lib_chord_type_from_intervals_logic() {
+        // Try the logic that gave us problems (Minor)
+        // A (9) -> C (0) = 3 semitones
+        // A (9) -> E (4) = 7 semitones
+        let third_interval = (Note::C.as_u8() + 12 - Note::A.as_u8()) % 12;
+        let fifth_interval = (Note::E.as_u8() + 12 - Note::A.as_u8()) % 12;
+        assert_eq!(third_interval, 3);
+        assert_eq!(fifth_interval, 7);
+        assert_eq!(ChordType::from_intervals(third_interval, fifth_interval), ChordType::Minor);
+
+        // Test the logic (Diminished)
+        // B (11) -> D (2) = 3 semitones
+        // B (11) -> F (5) = 6 semitones
+        let third_interval_b = (Note::D.as_u8() + 12 - Note::B.as_u8()) % 12;
+        let fifth_interval_b = (Note::F.as_u8() + 12 - Note::B.as_u8()) % 12;
+        assert_eq!(third_interval_b, 3);
+        assert_eq!(fifth_interval_b, 6);
+        assert_eq!(ChordType::from_intervals(third_interval_b, fifth_interval_b), ChordType::Diminished);
+    }
+
+    #[test]
+    fn test_lib_harmonize_c_major() {
+        let scale = build_scale(Note::C, ScaleType::Major);
+        let harmony = harmonize_scale(&scale);
+
+        // We extract only the qualities of the chords
+        let qualities: Vec<ChordType> = harmony.iter().map(|d| d.chord_type).collect();
+
+        let expected_qualities = vec![
+            ChordType::Major,
+            ChordType::Minor,
+            ChordType::Minor,
+            ChordType::Major,
+            ChordType::Major,
+            ChordType::Minor,
+            ChordType::Diminished,
+        ];
+
+        assert_eq!(qualities, expected_qualities);
+    }
+
+    #[test]
+    fn test_lib_harmonize_c_harmonic_minor() {
+        let scale = build_scale(Note::C, ScaleType::MinorHarmonic);
+        let harmony = harmonize_scale(&scale);
+
+        let qualities: Vec<ChordType> = harmony.iter().map(|d| d.chord_type).collect();
+
+        let expected_qualities = vec![
+            ChordType::Minor,
+            ChordType::Diminished,
+            ChordType::Augmented,
+            ChordType::Minor,
+            ChordType::Major,
+            ChordType::Major,
+            ChordType::Diminished,
+        ];
+
+        assert_eq!(qualities, expected_qualities);
+    }
+}

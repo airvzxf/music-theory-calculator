@@ -67,3 +67,69 @@ pub fn parse_chord_type(s: &str) -> ChordType {
         _ => panic!("Invalid chord type: {}", s),
     }
 }
+
+#[cfg(test)]
+mod tests {
+    // We import the parsing functions from the parent module (parser.rs)
+    use super::*;
+    // We also need the library's enums for comparison.
+    use tonic_music::{ChordType, Note, ScaleType};
+
+    #[test]
+    fn test_parse_note_simple() {
+        assert_eq!(parse_note("C"), Note::C);
+        assert_eq!(parse_note("E"), Note::E);
+    }
+
+    #[test]
+    fn test_parse_note_case_insensitive() {
+        assert_eq!(parse_note("c"), Note::C); // Lower case
+        assert_eq!(parse_note("f#"), Note::FSharp); // Lowercase sharp
+        assert_eq!(parse_note("Db"), Note::CSharp); // Capital letter flat
+    }
+
+    #[test]
+    fn test_parse_note_aliases() {
+        assert_eq!(parse_note("C#"), Note::CSharp);
+        assert_eq!(parse_note("Db"), Note::CSharp); // Alias Db -> CSharp
+        assert_eq!(parse_note("Eb"), Note::DSharp); // Alias Eb -> DSharp
+        assert_eq!(parse_note("bb"), Note::ASharp); // Alias bb -> ASharp
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_parse_note_invalid() {
+        // This test *passes* if the code panics.
+        // which is what we want.
+        parse_note("H");
+    }
+
+    #[test]
+    fn test_parse_scale_type() {
+        assert_eq!(parse_scale_type("major"), ScaleType::Major);
+        assert_eq!(parse_scale_type("MAJOR"), ScaleType::Major); // Capital letters
+        assert_eq!(parse_scale_type("minor"), ScaleType::MinorNatural);
+        assert_eq!(parse_scale_type("natural"), ScaleType::MinorNatural); // Alias
+        assert_eq!(parse_scale_type("harmonic"), ScaleType::MinorHarmonic);
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_parse_scale_type_invalid() {
+        parse_scale_type("pentatonic"); // We haven't implemented it yet.
+    }
+
+    #[test]
+    fn test_parse_chord_type() {
+        assert_eq!(parse_chord_type("min"), ChordType::Minor); // Alias
+        assert_eq!(parse_chord_type("MAJOR"), ChordType::Major); // Capital letters
+        assert_eq!(parse_chord_type("dim"), ChordType::Diminished); // Alias
+        assert_eq!(parse_chord_type("augmented"), ChordType::Augmented);
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_parse_chord_type_invalid() {
+        parse_chord_type("maj7"); // We haven't implemented it yet.
+    }
+}
