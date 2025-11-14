@@ -1,0 +1,146 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+'
+
+jobs:
+  create-release-body:
+    name: create-release-body
+    runs-on: ubuntu-latest
+    outputs:
+      release_body_path: ${{ steps.generate_body.outputs.path }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Required to fetch all history for changelog generation
+
+      - name: Generate release body
+        id: generate_body
+        shell: bash
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Get the previous tag, or the first commit if there's no previous tag
+          PREVIOUS_TAG=$(git describe --tags --abbrev=0 HEAD~1 2>/dev/null || git rev-list --max-parents=0 HEAD)
+
+          # Fetch commit data from GitHub API's compare endpoint
+          API_URL="https://api.github.com/repos/${{ github.repository }}/compare/$PREVIOUS_TAG...${{ github.ref_name }}"
+          COMMIT_DATA=$(curl -s -H "Authorization: token $GITHUB_TOKEN" -H "Accept: application/vnd.github.v3+json" "$API_URL")
+
+          # Generate changelog from API data using jq
+          CHANGELOG=$(echo "$COMMIT_DATA" | jq -r '
+            .commits | .[] |
+            .commit.message as $message |
+            .author.login as $author |
+            .sha as $sha |
+            .html_url as $url |
+            "* \($message | split("\n")[0]) ([\($sha | .[:7])](\($url)))" +
+            (if $author and $author != "" and $author != "null" then " by [@\($author)](https://github.com/\($author))" else "" end)
+          ')
+
+          # Generate contributors list from the same API data
+          USERNAMES=$(echo "$COMMIT_DATA" | jq -r '.commits | .[] | .author.login' | sort -u)
+          CONTRIBUTORS_LIST=$(echo "$USERNAMES" | sed 's/.*/\* \[@&\](https:\/\/github.com\/&)/')
+          CONTRIBUTOR_COUNT=$(echo "$USERNAMES" | wc -w | xargs)
+
+          # Construct the compare URL
+          COMPARE_URL="https://github.com/${{ github.repository }}/compare/$PREVIOUS_TAG..${{ github.ref_name }}"
+
+          # Create the release body content
+          BODY_CONTENT=$(cat <<-EOF
+          # Release ${{ github.ref_name }}
+
+          ## Description
+
+          Pending.
+
+          ## What is new?
+
+          $CHANGELOG
+
+          [$PREVIOUS_TAG -> ${{ github.ref_name }}]($COMPARE_URL)
+
+          ## Contributors.
+
+          ${CONTRIBUTORS_LIST}
+
+          ${CONTRIBUTOR_COUNT} contributors
+          EOF
+          )
+
+          # Save the body to a file and output its path
+          RELEASE_BODY_FILE="RELEASE_BODY.md"
+          echo "$BODY_CONTENT" > $RELEASE_BODY_FILE
+          echo "path=$RELEASE_BODY_FILE" >> $GITHUB_OUTPUT
+
+      - name: Upload release body artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-body
+          path: ${{ steps.generate_body.outputs.path }}
+
+  build-release:
+    permissions:
+      contents: write
+    name: build-release
+    needs: create-release-body
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            src/tonic-music/target
+          key: ${{ runner.os }}-cargo-release-${{ hashFiles('**/src/tonic-music/Cargo.lock') }}
+
+      - name: Generate Lockfile
+        run: cargo generate-lockfile
+        working-directory: src/tonic-music
+
+      - name: Build binary
+        run: cargo build --release --locked
+        working-directory: src/tonic-music
+
+      - name: Package binary
+        shell: bash
+        run: |
+          BINARY_NAME="tonic-music"
+          TARGET_DIR="src/tonic-music/target/release"
+          ASSET_NAME="${BINARY_NAME}-${{ runner.os }}"
+
+          if [ "${{ runner.os }}" = "Windows" ]; then
+            mv "${TARGET_DIR}/${BINARY_NAME}.exe" "${ASSET_NAME}.exe"
+            echo "ASSET_PATH=${ASSET_NAME}.exe" >> $GITHUB_ENV
+          else
+            mv "${TARGET_DIR}/${BINARY_NAME}" "${ASSET_NAME}"
+            tar -czf "${ASSET_NAME}.tar.gz" "${ASSET_NAME}"
+            echo "ASSET_PATH=${ASSET_NAME}.tar.gz" >> $GITHUB_ENV
+          fi
+
+      - name: Download release body artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: release-body
+          path: .
+
+      - name: Upload release assets
+        uses: softprops/action-gh-release@v1
+        with:
+          body_path: ${{ needs.create-release-body.outputs.release_body_path }}
+          files: ${{ env.ASSET_PATH }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
