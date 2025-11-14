@@ -1,0 +1,164 @@
+name: Continuous Integration
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Install Rust toolchain
+      uses: dtolnay/rust-toolchain@stable
+    - name: Cache dependencies
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.cargo/registry
+          ~/.cargo/git
+          src/tonic-music/target
+        key: ${{ runner.os }}-cargo-${{ hashFiles('**/src/tonic-music/Cargo.lock') }}
+    - name: Check formatting
+      run: cargo fmt -- --check
+      working-directory: src/tonic-music
+    - name: Run clippy
+      run: cargo clippy -- -D warnings
+      working-directory: src/tonic-music
+
+  build:
+    needs: lint
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Install Rust toolchain
+      uses: dtolnay/rust-toolchain@stable
+    - name: Cache dependencies
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.cargo/registry
+          ~/.cargo/git
+          src/tonic-music/target
+        key: ${{ runner.os }}-cargo-${{ hashFiles('**/src/tonic-music/Cargo.lock') }}
+    - name: Build
+      run: cargo build --verbose
+      working-directory: src/tonic-music
+
+  test:
+    needs: build
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [windows-latest, macos-latest, ubuntu-latest]
+    steps:
+    - uses: actions/checkout@v4
+    - name: Install Rust toolchain
+      uses: dtolnay/rust-toolchain@stable
+    - name: Cache dependencies
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.cargo/registry
+          ~/.cargo/git
+          src/tonic-music/target
+        key: ${{ runner.os }}-cargo-${{ hashFiles('**/src/tonic-music/Cargo.lock') }}
+    - name: Run tests
+      run: cargo test --verbose
+      working-directory: src/tonic-music
+
+  audit:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Install Rust toolchain
+      uses: dtolnay/rust-toolchain@stable
+    - name: Cache dependencies
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.cargo/registry
+          ~/.cargo/git
+          src/tonic-music/target
+        key: ${{ runner.os }}-cargo-${{ hashFiles('**/src/tonic-music/Cargo.lock') }}
+    - name: Cache cargo-audit
+      uses: actions/cache@v4
+      with:
+        path: ~/.cargo/bin/cargo-audit
+        key: ${{ runner.os }}-cargo-audit
+    - name: Install and run audit
+      run: |
+        if ! command -v cargo-audit &> /dev/null
+        then
+          cargo install cargo-audit
+        fi
+        cargo audit
+      working-directory: src/tonic-music
+
+  msrv-check:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Install Rust MSRV
+      uses: dtolnay/rust-toolchain@stable
+      with:
+        toolchain: '1.85.0'
+    - name: Cache dependencies
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.cargo/registry
+          ~/.cargo/git
+          src/tonic-music/target
+        key: ${{ runner.os }}-cargo-msrv-${{ hashFiles('**/src/tonic-music/Cargo.lock') }}
+    - name: Build with MSRV
+      run: cargo build --verbose
+      working-directory: src/tonic-music
+
+  feature-check:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Install Rust toolchain
+      uses: dtolnay/rust-toolchain@stable
+    - name: Cache dependencies
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.cargo/registry
+          ~/.cargo/git
+          src/tonic-music/target
+        key: ${{ runner.os }}-cargo-${{ hashFiles('**/src/tonic-music/Cargo.lock') }}
+    - name: Test with no default features
+      run: cargo test --no-default-features --verbose
+      working-directory: src/tonic-music
+    - name: Test with all features
+      run: cargo test --all-features --verbose
+      working-directory: src/tonic-music
+
+  doc-check:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Install Rust toolchain
+      uses: dtolnay/rust-toolchain@stable
+    - name: Cache dependencies
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.cargo/registry
+          ~/.cargo/git
+          src/tonic-music/target
+        key: ${{ runner.os }}-cargo-${{ hashFiles('**/src/tonic-music/Cargo.lock') }}
+    - name: Check documentation
+      run: RUSTDOCFLAGS="-D warnings" cargo doc --no-deps
+      working-directory: src/tonic-music

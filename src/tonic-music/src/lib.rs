@@ -132,7 +132,7 @@ impl Interval {
 ///
 /// # Examples
 ///
-/// ```
+/// ```text
 /// // This example won't run as a doc-test because
 /// // Note and Interval aren't in scope.
 /// // let note = transpose(Note::C, Interval::PerfectFifth);
@@ -199,7 +199,7 @@ impl ScaleType {
     }
 }
 
-/// Builds a Vec<Note> for a scale given a root note and scale type.
+/// Builds a `Vec<Note>` for a scale given a root note and scale type.
 pub fn build_scale(root: Note, scale_type: ScaleType) -> Vec<Note> {
     // 1. Get the interval formula for the scale
     let intervals = scale_type.intervals();
@@ -275,7 +275,7 @@ impl ChordType {
     }
 }
 
-/// Builds a Vec<Note> for a chord given a root note and chord type.
+/// Builds a `Vec<Note>` for a chord given a root note and chord type.
 pub fn build_chord(root: Note, chord_type: ChordType) -> Vec<Note> {
     // 1. Get the interval formula for the chord
     let intervals = chord_type.intervals();

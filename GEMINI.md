@@ -81,6 +81,13 @@ The tool has three main subcommands: `scale`, `chord`, and `harmonize`.
     -   `cli.rs`: Defines the command-line interface structure using `clap`.
     -   `parser.rs`: Handles parsing of user input strings into the library's data structures.
 -   **Error Handling:** The application currently uses `panic!` for invalid user input (e.g., an unrecognized note or scale type).
+-   **Continuous Integration:** The project uses a comprehensive GitHub Actions CI pipeline that runs on every push and pull request to the `main` branch. The pipeline enforces code quality and correctness through a series of jobs:
+    -   **Linting:** Checks code formatting (`cargo fmt`) and style (`cargo clippy`).
+    -   **Build:** Ensures the project compiles successfully on the latest stable Rust version.
+    -   **Testing Matrix:** Runs the test suite (`cargo test`) across Linux, Windows, and macOS.
+    -   **Security Audit:** Scans dependencies for known vulnerabilities (`cargo audit`).
+    -   **MSRV Check:** Verifies that the project compiles with the Minimum Supported Rust Version.
+    -   **Documentation Check:** Ensures all public APIs are documented (`cargo doc`).
 -   **Testing:** The project includes a suite of unit tests within the `lib.rs` and `parser.rs` files, located in `#[cfg(test)]` modules. These tests cover the core music theory logic and input parsing.
 -   **Contributing:** The `CONTRIBUTING.md` file should be consulted for contribution guidelines.
 -   **License:** The project is licensed under the AGPL v3.0.
