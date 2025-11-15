@@ -75,6 +75,7 @@ The tool has three main subcommands: `scale`, `chord`, and `harmonize`.
 -   **Generate a harmonic progression:**
     ```bash
     tonic-music progression -r A -f block
+    tonic-music progression -r A -f circle
     ```
 
 ## Development Conventions

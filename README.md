@@ -92,6 +92,21 @@ Generates a harmonic progression (chord formula).
 
 **Command:**
 ```bash
+tonic-music progression --root C --formula circle
+```
+
+**Output:**
+
+```text
+--- C circle Progression ---
+I:	C Major 	-> [C, E, G]
+vi:	A Minor 	-> [A, C, E]
+ii:	D Minor 	-> [D, F, A]
+V7:	G Dominant7 	-> [G, B, D, F]
+```
+
+**Command:**
+```bash
 tonic-music progression --root C --formula block
 ```
 

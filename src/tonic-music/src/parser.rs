@@ -81,6 +81,7 @@ pub fn parse_chord_type(s: &str) -> ChordType {
 pub fn parse_formula(s: &str) -> HarmonicFormula {
     match s.to_lowercase().as_str() {
         "block" | "blues" => HarmonicFormula::Block,
+        "circle" => HarmonicFormula::Circle,
         _ => panic!("Invalid formula: {}", s),
     }
 }
@@ -167,5 +168,17 @@ mod tests {
             parse_scale_type("pentatonic-minor"),
             ScaleType::PentatonicMinor
         );
+    }
+
+    #[test]
+    fn test_parse_formula_circle() {
+        assert_eq!(parse_formula("circle"), HarmonicFormula::Circle);
+        assert_eq!(parse_formula("CIRCLE"), HarmonicFormula::Circle);
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_parse_formula_invalid() {
+        parse_formula("guajira"); // Not yet implemented
     }
 }

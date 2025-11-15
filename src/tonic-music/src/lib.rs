@@ -382,7 +382,8 @@ pub enum HarmonicFormula {
     /// A 12-bar blues-style block progression
     /// Formula: I-Maj, V-Dom7, I-Dom7, IV-Maj
     Block,
-    // We will add Circle, Guajira, etc. here
+    /// A diatonic I-vi-ii-V7 "Circle" progression
+    Circle,
 }
 
 /// Represents a single chord within a progression
@@ -460,10 +461,10 @@ pub fn harmonize_scale(scale: &[Note], build_sevenths: bool) -> Vec<HarmonizedDe
 pub fn build_progression(root: Note, formula: HarmonicFormula) -> Vec<ProgressionChord> {
     match formula {
         HarmonicFormula::Block => build_block_progression(root),
+        HarmonicFormula::Circle => build_circle_progression(root),
     }
 }
 
-// -- NEW: Private helper for the 'Block' formula --
 /// Builds the I-V7-I7-IV "Block" (Blues) progression.
 fn build_block_progression(root: Note) -> Vec<ProgressionChord> {
     // 1. (I) - Major Triad
@@ -501,6 +502,49 @@ fn build_block_progression(root: Note) -> Vec<ProgressionChord> {
     };
 
     vec![degree_i, degree_v7, degree_i7, degree_iv]
+}
+
+/// Builds the I-vi-ii-V7 "Circle" progression.
+fn build_circle_progression(root: Note) -> Vec<ProgressionChord> {
+    // 1. (I) - Major Triad
+    let degree_i = ProgressionChord {
+        degree: "I".to_string(),
+        root_note: root,
+        chord_type: ChordType::Major,
+        notes: build_chord(root, ChordType::Major),
+    };
+
+    // 2. (vi) - minor Triad
+    // Root is a Major Sixth (9 semitones) up from I
+    let root_vi = transpose(root, Interval::MajorSixth);
+    let degree_vi = ProgressionChord {
+        degree: "vi".to_string(),
+        root_note: root_vi,
+        chord_type: ChordType::Minor,
+        notes: build_chord(root_vi, ChordType::Minor),
+    };
+
+    // 3. (ii) - minor Triad
+    // Root is a Major Second (2 semitones) up from I
+    let root_ii = transpose(root, Interval::MajorSecond);
+    let degree_ii = ProgressionChord {
+        degree: "ii".to_string(),
+        root_note: root_ii,
+        chord_type: ChordType::Minor,
+        notes: build_chord(root_ii, ChordType::Minor),
+    };
+
+    // 4. (V7) - Dominant 7th
+    // Root is a Perfect Fifth (7 semitones) up from I
+    let root_v = transpose(root, Interval::PerfectFifth);
+    let degree_v7 = ProgressionChord {
+        degree: "V7".to_string(),
+        root_note: root_v,
+        chord_type: ChordType::Dominant7,
+        notes: build_chord(root_v, ChordType::Dominant7),
+    };
+
+    vec![degree_i, degree_vi, degree_ii, degree_v7]
 }
 
 #[cfg(test)]
@@ -743,6 +787,33 @@ mod tests {
         assert_eq!(
             progression[1].notes,
             vec![Note::CSharp, Note::F, Note::GSharp, Note::B]
+        );
+    }
+
+    #[test]
+    fn test_lib_build_circle_progression_c_major() {
+        let progression = build_progression(Note::C, HarmonicFormula::Circle);
+
+        // Check the roots: C, A, D, G
+        let roots: Vec<Note> = progression.iter().map(|c| c.root_note).collect();
+        assert_eq!(roots, vec![Note::C, Note::A, Note::D, Note::G]);
+
+        // Check the types: Major, Minor, Minor, Dominant7
+        let types: Vec<ChordType> = progression.iter().map(|c| c.chord_type).collect();
+        assert_eq!(
+            types,
+            vec![
+                ChordType::Major,
+                ChordType::Minor,
+                ChordType::Minor,
+                ChordType::Dominant7
+            ]
+        );
+
+        // Check the notes of the V7 (G7)
+        assert_eq!(
+            progression[3].notes,
+            vec![Note::G, Note::B, Note::D, Note::F]
         );
     }
 }
