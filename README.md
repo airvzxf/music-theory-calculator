@@ -31,60 +31,59 @@ Ensure you have Rust and Cargo installed.
 `tonic-music` provides three main commands: `scale`, `chord`, and `harmonize`.
 
 ### `scale`
-Generates the notes of a given scale.
+Generates the notes of a given scale. Now supports `major`, `minor`, `harmonic` (minor), and pentatonic (`penta-major`, `penta-minor`) scales.
 
 **Command:**
 ```bash
-tonic-music scale --root F# --scale-type major
+tonic-music scale --root A --scale-type penta-minor
 ```
 
 **Output:**
 
 ```text
---- F# major Scale ---
-[FSharp, GSharp, ASharp, B, CSharp, DSharp, F]
+--- A penta-minor Scale ---
+[A, C, D, E, G]
 ```
 
 ### `chord`
 
-Generates the notes of a given chord.
-(Supports short-form flags `-r` for root and `-c` for chord-type).
+Generates the notes of a given chord. Now supports triads, a wide variety of **seventh chords** (e.g., `maj7`, `m7`, `7`), and can display **inversions**.
 
 **Command:**
-
 ```bash
-tonic-music chord -r Bb -c min
+tonic-music chord -r G -c 7 --inversions
 ```
 
 **Output:**
 
 ```text
---- Bb min Chord ---
-[ASharp, CSharp, F]
+--- G 7 Chord ---
+Root:   [G, B, D, F]
+1st Inv:    [B, D, F, G]
+2nd Inv:    [D, F, G, B]
+3rd Inv:    [F, G, B, D]
 ```
 
 ### `harmonize`
 
-Generates the full set of diatonic triads for a given scale.
-(Supports short-form flags `-r` for root and `-s` for scale-type).
+Generates the full set of diatonic chords for a given scale. Can now generate **seventh chords** instead of triads.
 
 **Command:**
-
 ```bash
-tonic-music harmonize -r C -s harmonic
+tonic-music harmonize -r C -s major --sevenths
 ```
 
 **Output:**
 
 ```text
---- C harmonic Harmonization ---
-I (C):       C m     -> [C, DSharp, G]
-II (D):      D °     -> [D, F, GSharp]
-III (DSharp):DSharp + -> [DSharp, G, B]
-IV (F):      F m     -> [F, GSharp, C]
-V (G):       G       -> [G, B, D]
-VI (GSharp): GSharp  -> [GSharp, C, DSharp]
-VII (B):     B °     -> [B, D, F]
+--- C major Harmonization ---
+I (C):       C maj7  -> [C, E, G, B]
+II (D):      D m7    -> [D, F, A, C]
+III (E):     E m7    -> [E, G, B, D]
+IV (F):      F maj7  -> [F, A, C, E]
+V (G):       G 7     -> [G, B, D, F]
+VI (A):      A m7    -> [A, C, E, G]
+VII (B):     B m7b5  -> [B, D, F, A]
 ```
 
 ## 🤝 Contributing

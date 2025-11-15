@@ -34,7 +34,7 @@ You are a world-class software architect specializing in the technology stack de
 
 ## Project Overview
 
-This project is a command-line music theory calculator named `tonic-music`. It is written in Rust and provides functionalities to generate musical scales, chords, and scale harmonizations. The tool is designed for musicians and developers who need quick music theory calculations from the terminal.
+This project is a command-line music theory calculator named `tonic-music`. It is written in Rust and provides functionalities to generate musical scales (including major, minor, and pentatonic), chords (including triads and a variety of seventh chords), chord inversions, and full scale harmonizations with triads or seventh chords. The tool is designed for musicians and developers who need quick music theory calculations from the terminal.
 
 The project is structured into a binary crate and a library crate. The binary (`main.rs`, `cli.rs`, `parser.rs`) handles command-line argument parsing using the `clap` library, while the core music theory logic (defining notes, scales, chords, and harmonization) resides in the library (`lib.rs`).
 
@@ -62,15 +62,15 @@ The tool has three main subcommands: `scale`, `chord`, and `harmonize`.
 
 -   **Generate a scale:**
     ```bash
-    tonic-music scale --root C --scale-type major
+    tonic-music scale --root C --scale-type penta-major
     ```
--   **Generate a chord:**
+-   **Generate a chord with its inversions:**
     ```bash
-    tonic-music chord -r F# -c min
+    tonic-music chord -r F# -c min7 --inversions
     ```
--   **Harmonize a scale:**
+-   **Harmonize a scale with seventh chords:**
     ```bash
-    tonic-music harmonize -r G -s harmonic
+    tonic-music harmonize -r G -s major --sevenths
     ```
 
 ## Development Conventions
