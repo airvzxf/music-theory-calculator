@@ -59,6 +59,10 @@ pub enum Commands {
         /// The type of chord (e.g., major, min, dim, aug)
         #[arg(short, long)]
         chord_type: String,
+
+        /// Also display the chord's inversions
+        #[arg(long)]
+        inversions: bool,
     },
 
     /// Harmonize a scale (find all its diatonic chords)

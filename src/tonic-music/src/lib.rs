@@ -338,6 +338,30 @@ pub fn build_chord(root: Note, chord_type: ChordType) -> Vec<Note> {
         .collect()
 }
 
+/// Calculates all inversions for a given set of chord notes.
+/// The first Vec in the list is always the root position.
+pub fn get_inversions(chord_notes: &[Note]) -> Vec<Vec<Note>> {
+    // If there are no notes, it returns an empty list.
+    if chord_notes.is_empty() {
+        return Vec::new();
+    }
+
+    let mut inversions = Vec::new();
+    let mut current_inversion = chord_notes.to_vec();
+
+    // Iterate once for each note in the chord
+    for _ in 0..current_inversion.len() {
+        // Add the current version to our list
+        inversions.push(current_inversion.clone());
+
+        // Turn Vec 1 position to the left
+        // [C, E, G] -> [E, G, C]
+        current_inversion.rotate_left(1);
+    }
+
+    inversions
+}
+
 /// Represents a single chord in a harmonized scale.
 #[derive(Debug, PartialEq, Eq)]
 pub struct HarmonizedDegree {
@@ -558,5 +582,32 @@ mod tests {
         ];
 
         assert_eq!(qualities, expected_qualities);
+    }
+
+    #[test]
+    fn test_lib_get_inversions() {
+        let chord = vec![Note::C, Note::E, Note::G];
+        let inversions = get_inversions(&chord);
+
+        let expected = vec![
+            vec![Note::C, Note::E, Note::G], // Root
+            vec![Note::E, Note::G, Note::C], // 1st
+            vec![Note::G, Note::C, Note::E], // 2nd
+        ];
+
+        assert_eq!(inversions, expected);
+
+        // Try a 7th chord
+        let chord_7 = vec![Note::G, Note::B, Note::D, Note::F];
+        let inversions_7 = get_inversions(&chord_7);
+
+        let expected_7 = vec![
+            vec![Note::G, Note::B, Note::D, Note::F], // Root
+            vec![Note::B, Note::D, Note::F, Note::G], // 1st
+            vec![Note::D, Note::F, Note::G, Note::B], // 2nd
+            vec![Note::F, Note::G, Note::B, Note::D], // 3rd
+        ];
+
+        assert_eq!(inversions_7, expected_7);
     }
 }

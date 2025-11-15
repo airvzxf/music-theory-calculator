@@ -27,7 +27,7 @@
 
 use clap::Parser;
 // Import our library's functions and structs
-use tonic_music::{ChordType, build_chord, build_scale, harmonize_scale};
+use tonic_music::{ChordType, build_chord, build_scale, get_inversions, harmonize_scale};
 
 // Declare the new parser.rs module
 mod parser;
@@ -53,7 +53,11 @@ fn main() {
             println!("--- {} {} Scale ---", root, scale_type);
             println!("{:?}", notes);
         }
-        Commands::Chord { root, chord_type } => {
+        Commands::Chord {
+            root,
+            chord_type,
+            inversions,
+        } => {
             let root_note = parse_note(root);
             let chord = parse_chord_type(chord_type);
 
@@ -61,7 +65,21 @@ fn main() {
             let notes = build_chord(root_note, chord);
 
             println!("--- {} {} Chord ---", root, chord_type);
-            println!("{:?}", notes);
+
+            if *inversions {
+                // Call the library's new feature
+                let all_inversions = get_inversions(&notes);
+                let titles = ["Root:", "1st Inv:", "2nd Inv:", "3rd Inv:", "4th Inv:"];
+
+                for (i, inv) in all_inversions.iter().enumerate() {
+                    // Use the title or a generic term if there are more inversions than expected.
+                    let title = titles.get(i).cloned().unwrap_or("Inv:");
+                    println!("{} \t{:?}", title, inv);
+                }
+            } else {
+                // Previous behavior
+                println!("{:?}", notes);
+            }
         }
         Commands::Harmonize {
             root,
