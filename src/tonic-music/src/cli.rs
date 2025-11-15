@@ -70,5 +70,9 @@ pub enum Commands {
         /// The type of scale to harmonize
         #[arg(short, long)]
         scale_type: String,
+
+        /// Generate diatonic 7th chords instead of triads
+        #[arg(long)]
+        sevenths: bool, // `clap` will set it to 'true' if the flag is present, or 'false' if it is not.
     },
 }

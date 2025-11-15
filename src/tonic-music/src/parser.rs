@@ -64,6 +64,13 @@ pub fn parse_chord_type(s: &str) -> ChordType {
         "minor" | "min" => ChordType::Minor,
         "diminished" | "dim" => ChordType::Diminished,
         "augmented" | "aug" => ChordType::Augmented,
+        "major7" | "maj7" => ChordType::Major7,
+        "minor7" | "min7" | "m7" => ChordType::Minor7,
+        "dominant7" | "dom7" | "7" => ChordType::Dominant7,
+        "minor7b5" | "m7b5" | "half-diminished" => ChordType::Minor7b5,
+        "diminished7" | "dim7" => ChordType::Diminished7,
+        "minormajor7" | "mmaj7" | "m(maj7)" => ChordType::MinorMajor7,
+        "augmentedmajor7" | "augmaj7" | "aug(maj7)" => ChordType::AugmentedMajor7,
         _ => panic!("Invalid chord type: {}", s),
     }
 }
@@ -130,6 +137,16 @@ mod tests {
     #[test]
     #[should_panic]
     fn test_parse_chord_type_invalid() {
-        parse_chord_type("maj7"); // We haven't implemented it yet.
+        // We test with "maj9" now, since "maj7" is valid.
+        parse_chord_type("maj9");
+    }
+
+    #[test]
+    fn test_parse_chord_type_sevenths() {
+        assert_eq!(parse_chord_type("maj7"), ChordType::Major7);
+        assert_eq!(parse_chord_type("m7"), ChordType::Minor7);
+        assert_eq!(parse_chord_type("7"), ChordType::Dominant7);
+        assert_eq!(parse_chord_type("m7b5"), ChordType::Minor7b5);
+        assert_eq!(parse_chord_type("dim7"), ChordType::Diminished7);
     }
 }

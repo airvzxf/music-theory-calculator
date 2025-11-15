@@ -220,7 +220,13 @@ pub enum ChordType {
     Minor,
     Diminished,
     Augmented,
-    // We can add 7th chords later
+    Major7,
+    Minor7,
+    Dominant7,
+    Minor7b5,        // Also known as Half-Diminished
+    Diminished7,     // Also known as Fully-Diminished
+    MinorMajor7,     // From the Harmonic Minor scale
+    AugmentedMajor7, // From the Harmonic Minor scale
 }
 
 impl ChordType {
@@ -247,29 +253,74 @@ impl ChordType {
                 Interval::MajorThird, // 3
                 Interval::MinorSixth, // #5 (or AugFifth)
             ],
+            ChordType::Major7 => &[
+                Interval::Unison,       // 1
+                Interval::MajorThird,   // 3
+                Interval::PerfectFifth, // 5
+                Interval::MajorSeventh, // 7
+            ],
+            ChordType::Minor7 => &[
+                Interval::Unison,       // 1
+                Interval::MinorThird,   // b3
+                Interval::PerfectFifth, // 5
+                Interval::MinorSeventh, // b7
+            ],
+            ChordType::Dominant7 => &[
+                Interval::Unison,       // 1
+                Interval::MajorThird,   // 3
+                Interval::PerfectFifth, // 5
+                Interval::MinorSeventh, // b7
+            ],
+            ChordType::Minor7b5 => &[
+                Interval::Unison,       // 1
+                Interval::MinorThird,   // b3
+                Interval::Tritone,      // b5
+                Interval::MinorSeventh, // b7
+            ],
+            ChordType::Diminished7 => &[
+                Interval::Unison,     // 1
+                Interval::MinorThird, // b3
+                Interval::Tritone,    // b5
+                Interval::MinorSixth, // bb7 (o 6)
+            ],
+            ChordType::MinorMajor7 => &[
+                Interval::Unison,       // 1
+                Interval::MinorThird,   // b3
+                Interval::PerfectFifth, // 5
+                Interval::MajorSeventh, // 7
+            ],
+            ChordType::AugmentedMajor7 => &[
+                Interval::Unison,       // 1
+                Interval::MajorThird,   // 3
+                Interval::MinorSixth,   // #5
+                Interval::MajorSeventh, // 7
+            ],
         }
     }
 
     /// Determines a chord type based on the semitone distance
-    /// of its third and fifth from the root.
-    pub fn from_intervals(third_interval: u8, fifth_interval: u8) -> Self {
-        match (third_interval, fifth_interval) {
-            // Major: Major Third (4) + Perfect Fifth (7)
-            (4, 7) => ChordType::Major,
-            // Minor: Minor Third (3) + Perfect Fifth (7)
-            (3, 7) => ChordType::Minor,
-            // Diminished: Minor Third (3) + Tritone (6)
-            (3, 6) => ChordType::Diminished,
-            // Augmented: Major Third (4) + Minor Sixth (8, or AugFifth)
-            (4, 8) => ChordType::Augmented,
+    /// of its third, fifth, and (optional) seventh from the root.
+    pub fn from_intervals(third: u8, fifth: u8, seventh: Option<u8>) -> Self {
+        match (third, fifth, seventh) {
+            // --- Seventh Cases ---
+            (4, 7, Some(11)) => ChordType::Major7,
+            (3, 7, Some(10)) => ChordType::Minor7,
+            (4, 7, Some(10)) => ChordType::Dominant7,
+            (3, 6, Some(10)) => ChordType::Minor7b5,
+            (3, 6, Some(9)) => ChordType::Diminished7, // 9 semitones = bb7
+            (3, 7, Some(11)) => ChordType::MinorMajor7,
+            (4, 8, Some(11)) => ChordType::AugmentedMajor7,
 
-            // This is a "catch-all"
-            // We panic! because our diatonic math should *never*
-            // produce a chord we don't recognize.
-            // If this code runs, our harmonization logic is wrong.
+            // --- Triad cases (if seventh is None) ---
+            (4, 7, None) => ChordType::Major,
+            (3, 7, None) => ChordType::Minor,
+            (3, 6, None) => ChordType::Diminished,
+            (4, 8, None) => ChordType::Augmented,
+
+            // Panic if it's an unknown combination
             _ => panic!(
-                "Failed to identify chord from intervals: 3rd={}, 5th={}",
-                third_interval, fifth_interval
+                "Failed to identify chord from intervals: 3rd={}, 5th={}, 7th={:?}",
+                third, fifth, seventh
             ),
         }
     }
@@ -298,42 +349,48 @@ pub struct HarmonizedDegree {
 
 /// Builds the diatonic triad chords for a given scale.
 /// The scale must contain 7 notes.
-pub fn harmonize_scale(scale: &[Note]) -> Vec<HarmonizedDegree> {
-    // Ensure we have a 7-note scale (heptatonic)
+pub fn harmonize_scale(scale: &[Note], build_sevenths: bool) -> Vec<HarmonizedDegree> {
     if scale.len() != 7 {
-        // Return an empty vec if not. We could also panic! or return a Result.
         return Vec::new();
     }
 
     let mut harmonized_scale = Vec::new();
 
-    // Iterate 7 times, once for each degree of the scale
     for i in 0..7 {
-        // 1. Get the 1st, 3rd, and 5th notes for this degree
-        // We use modular arithmetic to "wrap around" the scale
+        // 1. Get the notes for this degree
         let root = scale[i];
         let third = scale[(i + 2) % 7];
         let fifth = scale[(i + 4) % 7];
 
-        // 2. Calculate the intervals *between* these notes
+        // 2. Calculate the intervals
         let root_val = root.as_u8();
-        let third_val = third.as_u8();
-        let fifth_val = fifth.as_u8();
+        let third_interval = (third.as_u8() + 12 - root_val) % 12;
+        let fifth_interval = (fifth.as_u8() + 12 - root_val) % 12;
 
-        // This is the correct, safe way to find the distance:
-        // (destination + 12 - origin) % 12
-        let third_interval = (third_val + 12 - root_val) % 12;
-        let fifth_interval = (fifth_val + 12 - root_val) % 12;
+        let mut notes = vec![root, third, fifth];
+        let mut seventh_interval: Option<u8> = None;
+
+        // If the user wants 7 more, calculate the 7th
+        if build_sevenths {
+            let seventh = scale[(i + 6) % 7];
+            let seventh_val = seventh.as_u8();
+            seventh_interval = Some((seventh_val + 12 - root_val) % 12);
+            notes.push(seventh);
+        }
 
         // 3. Determine the chord type from these intervals
-        let chord_type = ChordType::from_intervals(third_interval, fifth_interval);
+        let chord_type = ChordType::from_intervals(
+            third_interval,
+            fifth_interval,
+            seventh_interval, // Pass Some(val) or None
+        );
 
         // 4. Store the result
         harmonized_scale.push(HarmonizedDegree {
-            degree: i + 1, // Store as 1-indexed
+            degree: i + 1,
             root_note: root,
             chord_type,
-            notes: vec![root, third, fifth],
+            notes, // notes now has 3 or 4 notes
         });
     }
 
@@ -410,7 +467,7 @@ mod tests {
         assert_eq!(third_interval, 3);
         assert_eq!(fifth_interval, 7);
         assert_eq!(
-            ChordType::from_intervals(third_interval, fifth_interval),
+            ChordType::from_intervals(third_interval, fifth_interval, None),
             ChordType::Minor
         );
 
@@ -422,7 +479,7 @@ mod tests {
         assert_eq!(third_interval_b, 3);
         assert_eq!(fifth_interval_b, 6);
         assert_eq!(
-            ChordType::from_intervals(third_interval_b, fifth_interval_b),
+            ChordType::from_intervals(third_interval_b, fifth_interval_b, None),
             ChordType::Diminished
         );
     }
@@ -430,7 +487,7 @@ mod tests {
     #[test]
     fn test_lib_harmonize_c_major() {
         let scale = build_scale(Note::C, ScaleType::Major);
-        let harmony = harmonize_scale(&scale);
+        let harmony = harmonize_scale(&scale, false);
 
         // We extract only the qualities of the chords
         let qualities: Vec<ChordType> = harmony.iter().map(|d| d.chord_type).collect();
@@ -451,7 +508,7 @@ mod tests {
     #[test]
     fn test_lib_harmonize_c_harmonic_minor() {
         let scale = build_scale(Note::C, ScaleType::MinorHarmonic);
-        let harmony = harmonize_scale(&scale);
+        let harmony = harmonize_scale(&scale, false);
 
         let qualities: Vec<ChordType> = harmony.iter().map(|d| d.chord_type).collect();
 
@@ -463,6 +520,41 @@ mod tests {
             ChordType::Major,
             ChordType::Major,
             ChordType::Diminished,
+        ];
+
+        assert_eq!(qualities, expected_qualities);
+    }
+
+    #[test]
+    fn test_lib_build_chord_sevenths() {
+        let chord = build_chord(Note::C, ChordType::Major7);
+        let expected = vec![Note::C, Note::E, Note::G, Note::B];
+        assert_eq!(chord, expected);
+
+        let chord = build_chord(Note::G, ChordType::Dominant7);
+        let expected = vec![Note::G, Note::B, Note::D, Note::F];
+        assert_eq!(chord, expected);
+
+        let chord = build_chord(Note::A, ChordType::Minor7);
+        let expected = vec![Note::A, Note::C, Note::E, Note::G];
+        assert_eq!(chord, expected);
+    }
+
+    #[test]
+    fn test_lib_harmonize_c_major_sevenths() {
+        let scale = build_scale(Note::C, ScaleType::Major);
+        let harmony = harmonize_scale(&scale, true); // true for 7mas
+
+        let qualities: Vec<ChordType> = harmony.iter().map(|d| d.chord_type).collect();
+
+        let expected_qualities = vec![
+            ChordType::Major7,
+            ChordType::Minor7,
+            ChordType::Minor7,
+            ChordType::Major7,
+            ChordType::Dominant7,
+            ChordType::Minor7,
+            ChordType::Minor7b5, // Half-diminished
         ];
 
         assert_eq!(qualities, expected_qualities);

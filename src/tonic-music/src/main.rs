@@ -63,13 +63,17 @@ fn main() {
             println!("--- {} {} Chord ---", root, chord_type);
             println!("{:?}", notes);
         }
-        Commands::Harmonize { root, scale_type } => {
+        Commands::Harmonize {
+            root,
+            scale_type,
+            sevenths,
+        } => {
             let root_note = parse_note(root);
             let scale = parse_scale_type(scale_type);
 
             // Call the library
             let scale_notes = build_scale(root_note, scale);
-            let harmony = harmonize_scale(&scale_notes);
+            let harmony = harmonize_scale(&scale_notes, *sevenths);
 
             println!("--- {} {} Harmonization ---", root, scale_type);
 
@@ -83,6 +87,13 @@ fn main() {
                     ChordType::Minor => "m",
                     ChordType::Diminished => "°",
                     ChordType::Augmented => "+",
+                    ChordType::Major7 => "maj7",
+                    ChordType::Minor7 => "m7",
+                    ChordType::Dominant7 => "7",
+                    ChordType::Minor7b5 => "m7b5",
+                    ChordType::Diminished7 => "°7",
+                    ChordType::MinorMajor7 => "m(maj7)",
+                    ChordType::AugmentedMajor7 => "aug(maj7)",
                 };
 
                 // Format: e.g., "I (C): C Major -> [C, E, G]"
