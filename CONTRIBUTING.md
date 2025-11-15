@@ -46,13 +46,24 @@ These contributions are incredibly helpful! Feel free to open an issue or a Pull
 ## 💻 Contributing Code
 If you're ready to write some code, here is the basic workflow:
 
+### Development Setup
+To ensure code quality and consistency, this project uses `pre-commit` hooks. These hooks run automatically before each commit to format, lint, and test the code.
+
+1.  **Install pre-commit:** Follow the official [installation guide](https://pre-commit.com/#installation). A common method is using pip:
+    ```bash
+    pip install pre-commit
+    ```
+2.  **Set up the hooks:** In the root of the project, run:
+    ```bash
+    pre-commit install
+    ```
+    Now, the checks will run automatically every time you run `git commit`.
+
+### Contribution Workflow
 1.  **Fork** the repository.
 2.  **Create a new branch** for your feature or bugfix (e.g., `git checkout -b feat/add-pentatonic-scale`).
 3.  **Make your changes.** Please follow the existing code style and add comments where necessary.
-4.  **Test your changes.** Before submitting, please run the core local checks to ensure your changes meet our quality standards. Our CI pipeline will run a full suite of tests, so passing these locally is a great first step.
-    *   **Format:** `cargo fmt -- --check`
-    *   **Lint:** `cargo clippy -- -D warnings`
-    *   **Test:** `cargo test`
+4.  **Test your changes.** The `pre-commit` hooks will automatically run format (`cargo fmt`), lint (`cargo clippy`), and test (`cargo test`) checks for you. Our CI pipeline will also run a full suite of tests, so ensuring they pass locally is a great first step.
     *   If you are adding a new feature or fixing a bug, please add new tests to cover your changes.
 5.  **Commit** your changes with a clear commit message.
 6.  **Push** your branch to your fork.
