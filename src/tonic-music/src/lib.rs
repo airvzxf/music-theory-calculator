@@ -158,7 +158,8 @@ pub enum ScaleType {
     Major,
     MinorNatural,
     MinorHarmonic,
-    // We can add more later (MinorMelodic, Pentatonic, etc.)
+    PentatonicMajor,
+    PentatonicMinor,
 }
 
 impl ScaleType {
@@ -194,6 +195,20 @@ impl ScaleType {
                 Interval::PerfectFifth,  // 5
                 Interval::MinorSixth,    // b6
                 Interval::MajorSeventh,  // 7 (The raised 7th)
+            ],
+            ScaleType::PentatonicMajor => &[
+                Interval::Unison,       // 1
+                Interval::MajorSecond,  // 2
+                Interval::MajorThird,   // 3
+                Interval::PerfectFifth, // 5
+                Interval::MajorSixth,   // 6
+            ],
+            ScaleType::PentatonicMinor => &[
+                Interval::Unison,        // 1
+                Interval::MinorThird,    // b3
+                Interval::PerfectFourth, // 4
+                Interval::PerfectFifth,  // 5
+                Interval::MinorSeventh,  // b7
             ],
         }
     }
@@ -609,5 +624,18 @@ mod tests {
         ];
 
         assert_eq!(inversions_7, expected_7);
+    }
+
+    #[test]
+    fn test_lib_build_scale_pentatonic() {
+        // C Major Pentatonic: C, D, E, G, A
+        let scale = build_scale(Note::C, ScaleType::PentatonicMajor);
+        let expected = vec![Note::C, Note::D, Note::E, Note::G, Note::A];
+        assert_eq!(scale, expected);
+
+        // A Minor Pentatonic: A, C, D, E, G
+        let scale = build_scale(Note::A, ScaleType::PentatonicMinor);
+        let expected = vec![Note::A, Note::C, Note::D, Note::E, Note::G];
+        assert_eq!(scale, expected);
     }
 }

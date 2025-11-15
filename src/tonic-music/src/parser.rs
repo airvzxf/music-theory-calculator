@@ -53,6 +53,8 @@ pub fn parse_scale_type(s: &str) -> ScaleType {
         "major" | "maj" => ScaleType::Major,
         "minor" | "natural" | "minor-natural" => ScaleType::MinorNatural,
         "harmonic" | "minor-harmonic" => ScaleType::MinorHarmonic,
+        "penta-major" | "pentatonic-major" => ScaleType::PentatonicMajor,
+        "penta-minor" | "pentatonic-minor" => ScaleType::PentatonicMinor,
         _ => panic!("Invalid scale type: {}", s),
     }
 }
@@ -123,7 +125,7 @@ mod tests {
     #[test]
     #[should_panic]
     fn test_parse_scale_type_invalid() {
-        parse_scale_type("pentatonic"); // We haven't implemented it yet.
+        parse_scale_type("phrygian"); // We haven't implemented it yet.
     }
 
     #[test]
@@ -148,5 +150,14 @@ mod tests {
         assert_eq!(parse_chord_type("7"), ChordType::Dominant7);
         assert_eq!(parse_chord_type("m7b5"), ChordType::Minor7b5);
         assert_eq!(parse_chord_type("dim7"), ChordType::Diminished7);
+    }
+
+    #[test]
+    fn test_parse_scale_type_pentatonic() {
+        assert_eq!(parse_scale_type("penta-major"), ScaleType::PentatonicMajor);
+        assert_eq!(
+            parse_scale_type("pentatonic-minor"),
+            ScaleType::PentatonicMinor
+        );
     }
 }
