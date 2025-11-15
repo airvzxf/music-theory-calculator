@@ -377,6 +377,26 @@ pub fn get_inversions(chord_notes: &[Note]) -> Vec<Vec<Note>> {
     inversions
 }
 
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+pub enum HarmonicFormula {
+    /// A 12-bar blues-style block progression
+    /// Formula: I-Maj, V-Dom7, I-Dom7, IV-Maj
+    Block,
+    // We will add Circle, Guajira, etc. here
+}
+
+/// Represents a single chord within a progression
+#[derive(Debug, PartialEq, Eq)]
+pub struct ProgressionChord {
+    /// The roman numeral degree (e.g., "I", "V7", "I7")
+    pub degree: String,
+    /// The specific chord (e.g., "Cmaj", "G7")
+    pub root_note: Note,
+    pub chord_type: ChordType,
+    /// The notes of the chord
+    pub notes: Vec<Note>,
+}
+
 /// Represents a single chord in a harmonized scale.
 #[derive(Debug, PartialEq, Eq)]
 pub struct HarmonizedDegree {
@@ -434,6 +454,53 @@ pub fn harmonize_scale(scale: &[Note], build_sevenths: bool) -> Vec<HarmonizedDe
     }
 
     harmonized_scale
+}
+
+/// Builds a chord progression from a root note and a formula.
+pub fn build_progression(root: Note, formula: HarmonicFormula) -> Vec<ProgressionChord> {
+    match formula {
+        HarmonicFormula::Block => build_block_progression(root),
+    }
+}
+
+// -- NEW: Private helper for the 'Block' formula --
+/// Builds the I-V7-I7-IV "Block" (Blues) progression.
+fn build_block_progression(root: Note) -> Vec<ProgressionChord> {
+    // 1. (I) - Major Triad
+    let degree_i = ProgressionChord {
+        degree: "I".to_string(),
+        root_note: root,
+        chord_type: ChordType::Major,
+        notes: build_chord(root, ChordType::Major),
+    };
+
+    // 2. (V7) - Dominant 7th
+    let root_v = transpose(root, Interval::PerfectFifth);
+    let degree_v7 = ProgressionChord {
+        degree: "V7".to_string(),
+        root_note: root_v,
+        chord_type: ChordType::Dominant7,
+        notes: build_chord(root_v, ChordType::Dominant7),
+    };
+
+    // 3. (I7) - Dominant 7th
+    let degree_i7 = ProgressionChord {
+        degree: "I7".to_string(),
+        root_note: root,
+        chord_type: ChordType::Dominant7,
+        notes: build_chord(root, ChordType::Dominant7),
+    };
+
+    // 4. (IV) - Major Triad
+    let root_iv = transpose(root, Interval::PerfectFourth);
+    let degree_iv = ProgressionChord {
+        degree: "IV".to_string(),
+        root_note: root_iv,
+        chord_type: ChordType::Major,
+        notes: build_chord(root_iv, ChordType::Major),
+    };
+
+    vec![degree_i, degree_v7, degree_i7, degree_iv]
 }
 
 #[cfg(test)]
@@ -637,5 +704,45 @@ mod tests {
         let scale = build_scale(Note::A, ScaleType::PentatonicMinor);
         let expected = vec![Note::A, Note::C, Note::D, Note::E, Note::G];
         assert_eq!(scale, expected);
+    }
+
+    #[test]
+    fn test_lib_build_block_progression_fsharp() {
+        let progression = build_progression(Note::FSharp, HarmonicFormula::Block);
+
+        let roots: Vec<Note> = progression.iter().map(|c| c.root_note).collect();
+        assert_eq!(
+            roots,
+            vec![Note::FSharp, Note::CSharp, Note::FSharp, Note::B]
+        );
+
+        let types: Vec<ChordType> = progression.iter().map(|c| c.chord_type).collect();
+        assert_eq!(
+            types,
+            vec![
+                ChordType::Major,
+                ChordType::Dominant7,
+                ChordType::Dominant7,
+                ChordType::Major
+            ]
+        );
+
+        // Test F#7 (I7)
+        // F#(6) + Maj3(4) = 10 (ASharp)
+        // F#(6) + P5(7) = 13%12 = 1 (CSharp)
+        // F#(6) + m7(10) = 16%12 = 4 (E)
+        assert_eq!(
+            progression[2].notes,
+            vec![Note::FSharp, Note::ASharp, Note::CSharp, Note::E]
+        );
+
+        // Test C#7 (V7)
+        // C#(1) + Maj3(4) = 5 (F)
+        // C#(1) + P5(7) = 8 (GSharp)
+        // C#(1) + m7(10) = 11 (B)
+        assert_eq!(
+            progression[1].notes,
+            vec![Note::CSharp, Note::F, Note::GSharp, Note::B]
+        );
     }
 }

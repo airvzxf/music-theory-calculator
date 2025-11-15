@@ -27,12 +27,14 @@
 
 use clap::Parser;
 // Import our library's functions and structs
-use tonic_music::{ChordType, build_chord, build_scale, get_inversions, harmonize_scale};
+use tonic_music::{
+    ChordType, build_chord, build_progression, build_scale, get_inversions, harmonize_scale,
+};
 
 // Declare the new parser.rs module
 mod parser;
 // Use the public functions from our parser module
-use parser::{parse_chord_type, parse_note, parse_scale_type};
+use parser::{parse_chord_type, parse_formula, parse_note, parse_scale_type};
 
 // Declare the CLI module
 mod cli;
@@ -118,6 +120,38 @@ fn main() {
                 println!(
                     "{} ({:?}):\t{:?} {} \t-> {:?}",
                     degree_name, degree.root_note, degree.root_note, quality, degree.notes
+                );
+            }
+        }
+        Commands::Progression { root, formula } => {
+            let root_note = parse_note(root);
+            let formula_type = parse_formula(formula);
+
+            // Call the library
+            let progression = build_progression(root_note, formula_type);
+
+            println!("--- {} {} Progression ---", root, formula);
+
+            for chord in &progression {
+                println!(
+                    "{}:\t{:?} {} \t-> {:?}",
+                    chord.degree,
+                    chord.root_note,
+                    // Re-usa la lógica de 'quality' que ya tenemos
+                    match chord.chord_type {
+                        ChordType::Major => "",
+                        ChordType::Minor => "m",
+                        ChordType::Diminished => "°",
+                        ChordType::Augmented => "+",
+                        ChordType::Major7 => "maj7",
+                        ChordType::Minor7 => "m7",
+                        ChordType::Dominant7 => "7",
+                        ChordType::Minor7b5 => "m7b5",
+                        ChordType::Diminished7 => "°7",
+                        ChordType::MinorMajor7 => "m(maj7)",
+                        ChordType::AugmentedMajor7 => "aug(maj7)",
+                    },
+                    chord.notes
                 );
             }
         }

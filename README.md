@@ -86,9 +86,28 @@ VI (A):      A m7    -> [A, C, E, G]
 VII (B):     B m7b5  -> [B, D, F, A]
 ```
 
+### `progression`
+
+Generates a harmonic progression (chord formula).
+
+**Command:**
+```bash
+tonic-music progression --root C --formula block
+```
+
+**Output:**
+
+```text
+--- C block Progression ---
+I:	C Major 	-> [C, E, G]
+V7:	G Dominant7 	-> [G, B, D, F]
+I7:	C Dominant7 	-> [C, E, G, Bb]
+IV:	F Major 	-> [F, A, C]
+```
+
 ## 🤝 Contributing
 
-Contributions are welcome\! Whether it's reporting a bug, suggesting a feature, or writing code, all help is appreciated.
+Contributions are welcome! Whether it's reporting a bug, suggesting a feature, or writing code, all help is appreciated.
 
 Please read our [CONTRIBUTING.md](https://www.google.com/search?q=CONTRIBUTING.md) for guidelines.
 

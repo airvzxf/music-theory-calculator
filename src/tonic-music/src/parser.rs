@@ -26,7 +26,7 @@
  */
 
 // We need to import the types from our library
-use tonic_music::{ChordType, Note, ScaleType};
+use tonic_music::{ChordType, HarmonicFormula, Note, ScaleType};
 
 /// Parses a string into a Note enum. Panics if invalid.
 pub fn parse_note(s: &str) -> Note {
@@ -74,6 +74,14 @@ pub fn parse_chord_type(s: &str) -> ChordType {
         "minormajor7" | "mmaj7" | "m(maj7)" => ChordType::MinorMajor7,
         "augmentedmajor7" | "augmaj7" | "aug(maj7)" => ChordType::AugmentedMajor7,
         _ => panic!("Invalid chord type: {}", s),
+    }
+}
+
+/// Parses a string into a HarmonicFormula enum. Panics if invalid.
+pub fn parse_formula(s: &str) -> HarmonicFormula {
+    match s.to_lowercase().as_str() {
+        "block" | "blues" => HarmonicFormula::Block,
+        _ => panic!("Invalid formula: {}", s),
     }
 }
 

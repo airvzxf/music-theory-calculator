@@ -79,4 +79,15 @@ pub enum Commands {
         #[arg(long)]
         sevenths: bool, // `clap` will set it to 'true' if the flag is present, or 'false' if it is not.
     },
+
+    /// Generate a harmonic progression (chord formula)
+    Progression {
+        /// The root note of the progression (e.g., C, Bb)
+        #[arg(short, long)]
+        root: String,
+
+        /// The name of the formula (e.g., block, circle)
+        #[arg(short, long)]
+        formula: String,
+    },
 }
