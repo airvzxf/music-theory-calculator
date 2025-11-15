@@ -37,37 +37,43 @@ jobs:
             .author.login as $author |
             .sha as $sha |
             .html_url as $url |
-            "* \($message | split("\n")[0]) ([\($sha | .[:7])](\($url)))" +
+            "* \($message | split("\n")[0]) | [\($sha | .[:7])](\($url))" +
             (if $author and $author != "" and $author != "null" then " by [@\($author)](https://github.com/\($author))" else "" end)
           ')
 
           # Generate contributors list from the same API data
-          USERNAMES=$(echo "$COMMIT_DATA" | jq -r '.commits | .[] | .author.login' | sort -u)
-          CONTRIBUTORS_LIST=$(echo "$USERNAMES" | sed 's/.*/\* \[@&\](https:\/\/github.com\/&)/')
-          CONTRIBUTOR_COUNT=$(echo "$USERNAMES" | wc -w | xargs)
+          USERS_DATA=$(echo "$COMMIT_DATA" | jq -r '.commits | .[] | .author | "\(.login) \(.id)"' | sort -u)
+          CONTRIBUTORS_LIST=""
+          while read -r login id; do
+            if [ -n "$login" ] && [ "$login" != "null" ]; then
+              avatar_url="https://avatars.githubusercontent.com/u/${id}?s=32&v=4"
+              CONTRIBUTORS_LIST="${CONTRIBUTORS_LIST} <a href=\"https://github.com/${login}\"><img src=\"${avatar_url}\" width=\"32\" height=\"32\" alt=\"${login}\"/></a>"
+            fi
+          done <<< "$USERS_DATA"
+          CONTRIBUTOR_COUNT=$(echo "$USERS_DATA" | wc -l | xargs)
 
           # Construct the compare URL
           COMPARE_URL="https://github.com/${{ github.repository }}/compare/$PREVIOUS_TAG..${{ github.ref_name }}"
 
           # Create the release body content
           BODY_CONTENT=$(cat <<-EOF
-          # Release ${{ github.ref_name }}
+          ## What's changed in ${{ github.ref_name }}
 
-          ## Description
+          ### Description
 
           Pending.
 
-          ## What is new?
+          ### Changelog
 
           $CHANGELOG
 
           [$PREVIOUS_TAG -> ${{ github.ref_name }}]($COMPARE_URL)
 
-          ## Contributors.
+          ### Contributors
 
           ${CONTRIBUTORS_LIST}
 
-          ${CONTRIBUTOR_COUNT} contributors
+          ${CONTRIBUTOR_COUNT} contributor(s)
           EOF
           )
 
@@ -131,16 +137,35 @@ jobs:
             echo "ASSET_PATH=${ASSET_NAME}.tar.gz" >> $GITHUB_ENV
           fi
 
-      - name: Download release body artifact
+      - name: Upload release assets artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-assets-${{ runner.os }}
+          path: ${{ env.ASSET_PATH }}
+
+  create-tag-and-release:
+    permissions:
+      contents: write
+    name: create-tag-and-release
+    needs: [create-release-body, build-release]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download all release artifacts
         uses: actions/download-artifact@v4
         with:
-          name: release-body
-          path: .
+          path: artifacts/
 
-      - name: Upload release assets
+      - name: Create release
         uses: softprops/action-gh-release@v1
         with:
-          body_path: ${{ needs.create-release-body.outputs.release_body_path }}
-          files: ${{ env.ASSET_PATH }}
+          name: Release ${{ github.ref_name }}
+          body_path: "artifacts/release-body/RELEASE_BODY.md"
+          files: |
+            artifacts/release-assets-Linux/tonic-music-Linux.tar.gz
+            artifacts/release-assets-macOS/tonic-music-macOS.tar.gz
+            artifacts/release-assets-Windows/tonic-music-Windows.exe
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
