@@ -377,6 +377,14 @@ pub fn get_inversions(chord_notes: &[Note]) -> Vec<Vec<Note>> {
     inversions
 }
 
+/// Calculates the shortest distance in semitones between two notes.
+fn semitone_distance(note1: Note, note2: Note) -> u8 {
+    let val1 = note1.as_u8();
+    let val2 = note2.as_u8();
+    let diff = (val1 as i8 - val2 as i8).unsigned_abs();
+    diff.min(12 - diff)
+}
+
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub enum HarmonicFormula {
     /// A 12-bar blues-style block progression
@@ -459,92 +467,98 @@ pub fn harmonize_scale(scale: &[Note], build_sevenths: bool) -> Vec<HarmonizedDe
 
 /// Builds a chord progression from a root note and a formula.
 pub fn build_progression(root: Note, formula: HarmonicFormula) -> Vec<ProgressionChord> {
-    match formula {
-        HarmonicFormula::Block => build_block_progression(root),
-        HarmonicFormula::Circle => build_circle_progression(root),
+    // 1. Get the sequence of (degree, root, type) from the formula-specific function
+    let chord_specs = match formula {
+        HarmonicFormula::Block => get_block_progression_spec(root),
+        HarmonicFormula::Circle => get_circle_progression_spec(root),
+    };
+
+    let mut progression = Vec::new();
+
+    // 2. Handle the first chord separately
+    let (degree, chord_root, chord_type) = &chord_specs[0];
+    let first_chord_notes = build_chord(*chord_root, *chord_type);
+    let mut previous_bass_note = *first_chord_notes.first().unwrap();
+    progression.push(ProgressionChord {
+        degree: degree.clone(),
+        root_note: *chord_root,
+        chord_type: *chord_type,
+        notes: first_chord_notes,
+    });
+
+    // 3. Loop through the rest of the chords and apply voice leading
+    for (degree, chord_root, chord_type) in chord_specs.iter().skip(1) {
+        let root_chord = build_chord(*chord_root, *chord_type);
+        let inversions = get_inversions(&root_chord);
+
+        let best_inversion = inversions
+            .into_iter()
+            .min_by(|inv_a, inv_b| {
+                let bass_a = inv_a.first().unwrap();
+                let bass_b = inv_b.first().unwrap();
+
+                let dist_a_root = semitone_distance(*bass_a, root);
+                let dist_b_root = semitone_distance(*bass_b, root);
+
+                let dist_a_prev = semitone_distance(*bass_a, previous_bass_note);
+                let dist_b_prev = semitone_distance(*bass_b, previous_bass_note);
+
+                // Compare by distance to tonic, then by distance to previous bass note
+                (dist_a_root, dist_a_prev).cmp(&(dist_b_root, dist_b_prev))
+            })
+            .unwrap_or(root_chord); // Fallback
+
+        previous_bass_note = *best_inversion.first().unwrap();
+
+        progression.push(ProgressionChord {
+            degree: degree.clone(),
+            root_note: *chord_root,
+            chord_type: *chord_type,
+            notes: best_inversion,
+        });
     }
+
+    progression
 }
 
-/// Builds the I-V7-I7-IV "Block" (Blues) progression.
-fn build_block_progression(root: Note) -> Vec<ProgressionChord> {
-    // 1. (I) - Major Triad
-    let degree_i = ProgressionChord {
-        degree: "I".to_string(),
-        root_note: root,
-        chord_type: ChordType::Major,
-        notes: build_chord(root, ChordType::Major),
-    };
-
-    // 2. (V7) - Dominant 7th
-    let root_v = transpose(root, Interval::PerfectFifth);
-    let degree_v7 = ProgressionChord {
-        degree: "V7".to_string(),
-        root_note: root_v,
-        chord_type: ChordType::Dominant7,
-        notes: build_chord(root_v, ChordType::Dominant7),
-    };
-
-    // 3. (I7) - Dominant 7th
-    let degree_i7 = ProgressionChord {
-        degree: "I7".to_string(),
-        root_note: root,
-        chord_type: ChordType::Dominant7,
-        notes: build_chord(root, ChordType::Dominant7),
-    };
-
-    // 4. (IV) - Major Triad
-    let root_iv = transpose(root, Interval::PerfectFourth);
-    let degree_iv = ProgressionChord {
-        degree: "IV".to_string(),
-        root_note: root_iv,
-        chord_type: ChordType::Major,
-        notes: build_chord(root_iv, ChordType::Major),
-    };
-
-    vec![degree_i, degree_v7, degree_i7, degree_iv]
+/// Returns the chord specifications for the I-V7-I7-IV "Block" (Blues) progression.
+fn get_block_progression_spec(root: Note) -> Vec<(String, Note, ChordType)> {
+    vec![
+        ("I".to_string(), root, ChordType::Major),
+        (
+            "V7".to_string(),
+            transpose(root, Interval::PerfectFifth),
+            ChordType::Dominant7,
+        ),
+        ("I7".to_string(), root, ChordType::Dominant7),
+        (
+            "IV".to_string(),
+            transpose(root, Interval::PerfectFourth),
+            ChordType::Major,
+        ),
+    ]
 }
 
-/// Builds the I-vi-ii-V7 "Circle" progression.
-fn build_circle_progression(root: Note) -> Vec<ProgressionChord> {
-    // 1. (I) - Major Triad
-    let degree_i = ProgressionChord {
-        degree: "I".to_string(),
-        root_note: root,
-        chord_type: ChordType::Major,
-        notes: build_chord(root, ChordType::Major),
-    };
-
-    // 2. (vi) - minor Triad
-    // Root is a Major Sixth (9 semitones) up from I
-    let root_vi = transpose(root, Interval::MajorSixth);
-    let degree_vi = ProgressionChord {
-        degree: "vi".to_string(),
-        root_note: root_vi,
-        chord_type: ChordType::Minor,
-        notes: build_chord(root_vi, ChordType::Minor),
-    };
-
-    // 3. (ii) - minor Triad
-    // Root is a Major Second (2 semitones) up from I
-    let root_ii = transpose(root, Interval::MajorSecond);
-    let degree_ii = ProgressionChord {
-        degree: "ii".to_string(),
-        root_note: root_ii,
-        chord_type: ChordType::Minor,
-        notes: build_chord(root_ii, ChordType::Minor),
-    };
-
-    // 4. (V7) - Dominant 7th
-    // Root is a Perfect Fifth (7 semitones) up from I
-    let root_v = transpose(root, Interval::PerfectFifth);
-    let degree_v7 = ProgressionChord {
-        degree: "V7".to_string(),
-        root_note: root_v,
-        chord_type: ChordType::Dominant7,
-        notes: build_chord(root_v, ChordType::Dominant7),
-    };
-
-    vec![degree_i, degree_vi, degree_ii, degree_v7]
+/// Returns the chord specifications for the I-vi-ii-V7 "Circle" progression.
+fn get_circle_progression_spec(root: Note) -> Vec<(String, Note, ChordType)> {
+    vec![
+        ("I".to_string(), root, ChordType::Major),
+        (
+            "vi".to_string(),
+            transpose(root, Interval::MajorSixth),
+            ChordType::Minor,
+        ),
+        (
+            "ii".to_string(),
+            transpose(root, Interval::MajorSecond),
+            ChordType::Minor,
+        ),
+        (
+            "V7".to_string(),
+            transpose(root, Interval::PerfectFifth),
+            ChordType::Dominant7,
+        ),
+    ]
 }
 
 #[cfg(test)]
@@ -771,22 +785,18 @@ mod tests {
             ]
         );
 
-        // Test F#7 (I7)
-        // F#(6) + Maj3(4) = 10 (ASharp)
-        // F#(6) + P5(7) = 13%12 = 1 (CSharp)
-        // F#(6) + m7(10) = 16%12 = 4 (E)
+        // Test F#7 (I7) - Should be root position [F#, A#, C#, E]
+        // Bass F# is closest to tonic F# (dist 0)
         assert_eq!(
             progression[2].notes,
             vec![Note::FSharp, Note::ASharp, Note::CSharp, Note::E]
         );
 
-        // Test C#7 (V7)
-        // C#(1) + Maj3(4) = 5 (F)
-        // C#(1) + P5(7) = 8 (GSharp)
-        // C#(1) + m7(10) = 11 (B)
+        // Test C#7 (V7) - Should be 1st inversion [F, G#, B, C#]
+        // Bass F is closest to tonic F# (dist 1)
         assert_eq!(
             progression[1].notes,
-            vec![Note::CSharp, Note::F, Note::GSharp, Note::B]
+            vec![Note::F, Note::GSharp, Note::B, Note::CSharp]
         );
     }
 
@@ -810,10 +820,11 @@ mod tests {
             ]
         );
 
-        // Check the notes of the V7 (G7)
+        // Check the notes of the V7 (G7) - Should be 1st inversion [B, D, F, G]
+        // Bass B is closest to tonic C (dist 1)
         assert_eq!(
             progression[3].notes,
-            vec![Note::G, Note::B, Note::D, Note::F]
+            vec![Note::B, Note::D, Note::F, Note::G]
         );
     }
 }

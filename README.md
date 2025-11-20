@@ -88,7 +88,7 @@ VII (B):     B m7b5  -> [B, D, F, A]
 
 ### `progression`
 
-Generates a harmonic progression (chord formula).
+Generates a harmonic progression (chord formula). Now features **voice leading**, automatically selecting inversions to create smoother transitions between chords.
 
 **Command:**
 ```bash
@@ -99,10 +99,10 @@ tonic-music progression --root C --formula circle
 
 ```text
 --- C circle Progression ---
-I:	C Major 	-> [C, E, G]
-vi:	A Minor 	-> [A, C, E]
-ii:	D Minor 	-> [D, F, A]
-V7:	G Dominant7 	-> [G, B, D, F]
+I:      C       -> [C, E, G]
+vi:     A m     -> [C, E, A]
+ii:     D m     -> [D, F, A]
+V7:     G 7     -> [B, D, F, G]
 ```
 
 **Command:**
@@ -114,10 +114,10 @@ tonic-music progression --root C --formula block
 
 ```text
 --- C block Progression ---
-I:	C Major 	-> [C, E, G]
-V7:	G Dominant7 	-> [G, B, D, F]
-I7:	C Dominant7 	-> [C, E, G, Bb]
-IV:	F Major 	-> [F, A, C]
+I:      C       -> [C, E, G]
+V7:     G 7     -> [B, D, F, G]
+I7:     C 7     -> [C, E, G, ASharp]
+IV:     F       -> [C, F, A]
 ```
 
 ## 🤝 Contributing
