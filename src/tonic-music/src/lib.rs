@@ -29,7 +29,7 @@
 // Debug:   Lets us print it with println!("{:?}", note);
 // Copy/Clone: Lets us easily copy the note (e.g., let note2 = note1;)
 // PartialEq/Eq: Lets us compare them (e.g., if note1 == Note::C { ... })
-#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+#[derive(Copy, Clone, PartialEq, Eq)]
 pub enum Note {
     C,
     CSharp, // Represents C# or Db
@@ -43,6 +43,26 @@ pub enum Note {
     A,
     ASharp, // Represents A# or Bb
     B,
+}
+
+impl std::fmt::Debug for Note {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let s = match self {
+            Note::C => "C",
+            Note::CSharp => "C#",
+            Note::D => "D",
+            Note::DSharp => "D#",
+            Note::E => "E",
+            Note::F => "F",
+            Note::FSharp => "F#",
+            Note::G => "G",
+            Note::GSharp => "G#",
+            Note::A => "A",
+            Note::ASharp => "A#",
+            Note::B => "B",
+        };
+        write!(f, "{}", s)
+    }
 }
 
 // 'impl' lets us add methods to our Note enum
@@ -575,6 +595,14 @@ mod tests {
     fn test_lib_transpose_wrap_around() {
         // A (9) + MajorThird (4) = 13. 13 % 12 = 1 (CSharp)
         assert_eq!(transpose(Note::A, Interval::MajorThird), Note::CSharp);
+    }
+
+    #[test]
+    fn test_lib_note_debug_display() {
+        assert_eq!(format!("{:?}", Note::C), "C");
+        assert_eq!(format!("{:?}", Note::CSharp), "C#");
+        assert_eq!(format!("{:?}", Note::FSharp), "F#");
+        assert_eq!(format!("{:?}", Note::B), "B");
     }
 
     #[test]

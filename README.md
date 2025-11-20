@@ -116,7 +116,7 @@ tonic-music progression --root C --formula block
 --- C block Progression ---
 I:      C       -> [C, E, G]
 V7:     G 7     -> [B, D, F, G]
-I7:     C 7     -> [C, E, G, ASharp]
+I7:     C 7     -> [C, E, G, A#]
 IV:     F       -> [C, F, A]
 ```
 
