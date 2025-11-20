@@ -26,7 +26,7 @@
  */
 
 // We need to import the types from our library
-use tonic_music::{ChordType, HarmonicFormula, Note, ScaleType};
+use tonic_music::Note;
 
 /// Parses a string into a Note enum. Panics if invalid.
 pub fn parse_note(s: &str) -> Note {
@@ -47,51 +47,12 @@ pub fn parse_note(s: &str) -> Note {
     }
 }
 
-/// Parses a string into a ScaleType enum. Panics if invalid.
-pub fn parse_scale_type(s: &str) -> ScaleType {
-    match s.to_lowercase().as_str() {
-        "major" | "maj" => ScaleType::Major,
-        "minor" | "natural" | "minor-natural" => ScaleType::MinorNatural,
-        "harmonic" | "minor-harmonic" => ScaleType::MinorHarmonic,
-        "penta-major" | "pentatonic-major" => ScaleType::PentatonicMajor,
-        "penta-minor" | "pentatonic-minor" => ScaleType::PentatonicMinor,
-        _ => panic!("Invalid scale type: {}", s),
-    }
-}
-
-/// Parses a string into a ChordType enum. Panics if invalid.
-pub fn parse_chord_type(s: &str) -> ChordType {
-    match s.to_lowercase().as_str() {
-        "major" | "maj" => ChordType::Major,
-        "minor" | "min" => ChordType::Minor,
-        "diminished" | "dim" => ChordType::Diminished,
-        "augmented" | "aug" => ChordType::Augmented,
-        "major7" | "maj7" => ChordType::Major7,
-        "minor7" | "min7" | "m7" => ChordType::Minor7,
-        "dominant7" | "dom7" | "7" => ChordType::Dominant7,
-        "minor7b5" | "m7b5" | "half-diminished" => ChordType::Minor7b5,
-        "diminished7" | "dim7" => ChordType::Diminished7,
-        "minormajor7" | "mmaj7" | "m(maj7)" => ChordType::MinorMajor7,
-        "augmentedmajor7" | "augmaj7" | "aug(maj7)" => ChordType::AugmentedMajor7,
-        _ => panic!("Invalid chord type: {}", s),
-    }
-}
-
-/// Parses a string into a HarmonicFormula enum. Panics if invalid.
-pub fn parse_formula(s: &str) -> HarmonicFormula {
-    match s.to_lowercase().as_str() {
-        "block" | "blues" => HarmonicFormula::Block,
-        "circle" => HarmonicFormula::Circle,
-        _ => panic!("Invalid formula: {}", s),
-    }
-}
-
 #[cfg(test)]
 mod tests {
     // We import the parsing functions from the parent module (parser.rs)
     use super::*;
     // We also need the library's enums for comparison.
-    use tonic_music::{ChordType, Note, ScaleType};
+    use tonic_music::Note;
 
     #[test]
     fn test_parse_note_simple() {
@@ -120,65 +81,5 @@ mod tests {
         // This test *passes* if the code panics.
         // which is what we want.
         parse_note("H");
-    }
-
-    #[test]
-    fn test_parse_scale_type() {
-        assert_eq!(parse_scale_type("major"), ScaleType::Major);
-        assert_eq!(parse_scale_type("MAJOR"), ScaleType::Major); // Capital letters
-        assert_eq!(parse_scale_type("minor"), ScaleType::MinorNatural);
-        assert_eq!(parse_scale_type("natural"), ScaleType::MinorNatural); // Alias
-        assert_eq!(parse_scale_type("harmonic"), ScaleType::MinorHarmonic);
-    }
-
-    #[test]
-    #[should_panic]
-    fn test_parse_scale_type_invalid() {
-        parse_scale_type("phrygian"); // We haven't implemented it yet.
-    }
-
-    #[test]
-    fn test_parse_chord_type() {
-        assert_eq!(parse_chord_type("min"), ChordType::Minor); // Alias
-        assert_eq!(parse_chord_type("MAJOR"), ChordType::Major); // Capital letters
-        assert_eq!(parse_chord_type("dim"), ChordType::Diminished); // Alias
-        assert_eq!(parse_chord_type("augmented"), ChordType::Augmented);
-    }
-
-    #[test]
-    #[should_panic]
-    fn test_parse_chord_type_invalid() {
-        // We test with "maj9" now, since "maj7" is valid.
-        parse_chord_type("maj9");
-    }
-
-    #[test]
-    fn test_parse_chord_type_sevenths() {
-        assert_eq!(parse_chord_type("maj7"), ChordType::Major7);
-        assert_eq!(parse_chord_type("m7"), ChordType::Minor7);
-        assert_eq!(parse_chord_type("7"), ChordType::Dominant7);
-        assert_eq!(parse_chord_type("m7b5"), ChordType::Minor7b5);
-        assert_eq!(parse_chord_type("dim7"), ChordType::Diminished7);
-    }
-
-    #[test]
-    fn test_parse_scale_type_pentatonic() {
-        assert_eq!(parse_scale_type("penta-major"), ScaleType::PentatonicMajor);
-        assert_eq!(
-            parse_scale_type("pentatonic-minor"),
-            ScaleType::PentatonicMinor
-        );
-    }
-
-    #[test]
-    fn test_parse_formula_circle() {
-        assert_eq!(parse_formula("circle"), HarmonicFormula::Circle);
-        assert_eq!(parse_formula("CIRCLE"), HarmonicFormula::Circle);
-    }
-
-    #[test]
-    #[should_panic]
-    fn test_parse_formula_invalid() {
-        parse_formula("guajira"); // Not yet implemented
     }
 }

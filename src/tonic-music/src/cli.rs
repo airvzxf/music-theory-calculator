@@ -25,7 +25,19 @@
  * structure using clap.
  */
 
-use clap::Parser;
+use clap::{Parser, ValueEnum};
+use serde::Serialize;
+use tonic_music::{ChordType, HarmonicFormula, ScaleType};
+
+/// Available output formats
+#[derive(ValueEnum, Clone, Debug, Default, Serialize)]
+#[clap(rename_all = "kebab-case")]
+pub enum OutputFormat {
+    #[default]
+    Text,
+    Json,
+    Markdown,
+}
 
 /// A command-line music theory calculator
 #[derive(Parser, Debug)]
@@ -34,6 +46,10 @@ pub struct Cli {
     /// The command to run (scale, chord, harmonize)
     #[command(subcommand)]
     pub command: Commands,
+
+    /// Output format
+    #[arg(long, value_enum, default_value_t = OutputFormat::Text, global = true)]
+    pub format: OutputFormat,
 }
 
 /// Defines the available subcommands
@@ -46,8 +62,8 @@ pub enum Commands {
         root: String,
 
         /// The type of scale (e.g., major, minor, harmonic)
-        #[arg(short, long)]
-        scale_type: String,
+        #[arg(short, long, value_enum)]
+        scale_type: ScaleType,
     },
 
     /// Generate the notes of a chord
@@ -57,8 +73,8 @@ pub enum Commands {
         root: String,
 
         /// The type of chord (e.g., major, min, dim, aug)
-        #[arg(short, long)]
-        chord_type: String,
+        #[arg(short, long, value_enum)]
+        chord_type: ChordType,
 
         /// Also display the chord's inversions
         #[arg(long)]
@@ -72,8 +88,8 @@ pub enum Commands {
         root: String,
 
         /// The type of scale to harmonize
-        #[arg(short, long)]
-        scale_type: String,
+        #[arg(short, long, value_enum)]
+        scale_type: ScaleType,
 
         /// Generate diatonic 7th chords instead of triads
         #[arg(long)]
@@ -87,7 +103,7 @@ pub enum Commands {
         root: String,
 
         /// The name of the formula (e.g., block, circle)
-        #[arg(short, long)]
-        formula: String,
+        #[arg(short, long, value_enum)]
+        formula: HarmonicFormula,
     },
 }

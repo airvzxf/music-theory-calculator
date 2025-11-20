@@ -25,27 +25,40 @@
  * logic will live here.
  */
 
+use clap::ValueEnum;
+use serde::Serialize;
+
 // 'derive' gives us "free" functionality for this enum.
-// Debug:   Lets us print it with println!("{:?}", note);
 // Copy/Clone: Lets us easily copy the note (e.g., let note2 = note1;)
 // PartialEq/Eq: Lets us compare them (e.g., if note1 == Note::C { ... })
-#[derive(Copy, Clone, PartialEq, Eq)]
+#[derive(Copy, Clone, PartialEq, Eq, Serialize)]
 pub enum Note {
     C,
+    #[serde(rename = "C#")]
     CSharp, // Represents C# or Db
     D,
+    #[serde(rename = "D#")]
     DSharp, // Represents D# or Eb
     E,
     F,
+    #[serde(rename = "F#")]
     FSharp, // Represents F# or Gb
     G,
+    #[serde(rename = "G#")]
     GSharp, // Represents G# or Ab
     A,
+    #[serde(rename = "A#")]
     ASharp, // Represents A# or Bb
     B,
 }
 
 impl std::fmt::Debug for Note {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self)
+    }
+}
+
+impl std::fmt::Display for Note {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let s = match self {
             Note::C => "C",
@@ -109,7 +122,7 @@ impl Note {
     }
 }
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Serialize)]
 pub enum Interval {
     // We only need intervals up to an Octave for now
     Unison,
@@ -173,12 +186,18 @@ pub fn transpose(root: Note, interval: Interval) -> Note {
 }
 
 /// Represents different types of scales.
-#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, ValueEnum, Serialize)]
+#[clap(rename_all = "kebab-case")]
 pub enum ScaleType {
+    #[value(alias("maj"))]
     Major,
+    #[value(alias("minor"), alias("natural"))]
     MinorNatural,
+    #[value(alias("harmonic"))]
     MinorHarmonic,
+    #[value(alias("penta-major"))]
     PentatonicMajor,
+    #[value(alias("penta-minor"))]
     PentatonicMinor,
 }
 
@@ -249,18 +268,30 @@ pub fn build_scale(root: Note, scale_type: ScaleType) -> Vec<Note> {
 }
 
 /// Represents different types of chords (triads for now).
-#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, ValueEnum, Serialize)]
+#[clap(rename_all = "kebab-case")]
 pub enum ChordType {
+    #[value(alias("maj"))]
     Major,
+    #[value(alias("min"))]
     Minor,
+    #[value(alias("dim"))]
     Diminished,
+    #[value(alias("aug"))]
     Augmented,
+    #[value(alias("maj7"))]
     Major7,
+    #[value(alias("min7"), alias("m7"))]
     Minor7,
+    #[value(alias("dom7"), alias("7"))]
     Dominant7,
-    Minor7b5,        // Also known as Half-Diminished
-    Diminished7,     // Also known as Fully-Diminished
-    MinorMajor7,     // From the Harmonic Minor scale
+    #[value(alias("m7b5"), alias("half-diminished"))]
+    Minor7b5, // Also known as Half-Diminished
+    #[value(alias("dim7"))]
+    Diminished7, // Also known as Fully-Diminished
+    #[value(alias("mmaj7"), alias("m(maj7)"))]
+    MinorMajor7, // From the Harmonic Minor scale
+    #[value(alias("augmaj7"), alias("aug(maj7)"))]
     AugmentedMajor7, // From the Harmonic Minor scale
 }
 
@@ -405,17 +436,19 @@ fn semitone_distance(note1: Note, note2: Note) -> u8 {
     diff.min(12 - diff)
 }
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, ValueEnum, Serialize)]
+#[clap(rename_all = "kebab-case")]
 pub enum HarmonicFormula {
     /// A 12-bar blues-style block progression
     /// Formula: I-Maj, V-Dom7, I-Dom7, IV-Maj
+    #[value(alias("blues"))]
     Block,
     /// A diatonic I-vi-ii-V7 "Circle" progression
     Circle,
 }
 
 /// Represents a single chord within a progression
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, Serialize)]
 pub struct ProgressionChord {
     /// The roman numeral degree (e.g., "I", "V7", "I7")
     pub degree: String,
@@ -427,7 +460,7 @@ pub struct ProgressionChord {
 }
 
 /// Represents a single chord in a harmonized scale.
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, Serialize)]
 pub struct HarmonizedDegree {
     pub degree: usize, // 1-indexed (I, II, III...)
     pub root_note: Note,
@@ -598,11 +631,11 @@ mod tests {
     }
 
     #[test]
-    fn test_lib_note_debug_display() {
-        assert_eq!(format!("{:?}", Note::C), "C");
-        assert_eq!(format!("{:?}", Note::CSharp), "C#");
-        assert_eq!(format!("{:?}", Note::FSharp), "F#");
-        assert_eq!(format!("{:?}", Note::B), "B");
+    fn test_lib_note_display() {
+        assert_eq!(format!("{}", Note::C), "C");
+        assert_eq!(format!("{}", Note::CSharp), "C#");
+        assert_eq!(format!("{}", Note::FSharp), "F#");
+        assert_eq!(format!("{}", Note::B), "B");
     }
 
     #[test]
