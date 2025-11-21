@@ -30,13 +30,8 @@ use serde::Serialize;
 // Import our library's functions and structs
 use tonic_music_core::{
     ChordType, HarmonizedDegree, Note, ProgressionChord, build_chord, build_progression,
-    build_scale, get_inversions, harmonize_scale,
+    build_scale, get_inversions, harmonize_scale, parser::parse_note,
 };
-
-// Declare the new parser.rs module
-mod parser;
-// Use the public functions from our parser module
-use parser::parse_note;
 
 // Declare the CLI module
 mod cli;
@@ -228,7 +223,10 @@ fn main() {
 
     match &cli_args.command {
         Commands::Scale { root, scale_type } => {
-            let root_note = parse_note(root);
+            let root_note = parse_note(root).unwrap_or_else(|e| {
+                eprintln!("Error: {}", e);
+                std::process::exit(1);
+            });
             // scale_type is already typed
             let notes = build_scale(root_note, *scale_type);
 
@@ -244,7 +242,10 @@ fn main() {
             chord_type,
             inversions,
         } => {
-            let root_note = parse_note(root);
+            let root_note = parse_note(root).unwrap_or_else(|e| {
+                eprintln!("Error: {}", e);
+                std::process::exit(1);
+            });
             let notes = build_chord(root_note, *chord_type);
 
             let invs = if *inversions {
@@ -266,7 +267,10 @@ fn main() {
             scale_type,
             sevenths,
         } => {
-            let root_note = parse_note(root);
+            let root_note = parse_note(root).unwrap_or_else(|e| {
+                eprintln!("Error: {}", e);
+                std::process::exit(1);
+            });
             let scale_notes = build_scale(root_note, *scale_type);
             let harmony = harmonize_scale(&scale_notes, *sevenths);
 
@@ -278,7 +282,10 @@ fn main() {
             print_output(&response, cli_args.format);
         }
         Commands::Progression { root, formula } => {
-            let root_note = parse_note(root);
+            let root_note = parse_note(root).unwrap_or_else(|e| {
+                eprintln!("Error: {}", e);
+                std::process::exit(1);
+            });
             let progression = build_progression(root_note, *formula);
 
             let response = ProgressionResponse {

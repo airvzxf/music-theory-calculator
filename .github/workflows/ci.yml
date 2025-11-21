@@ -153,3 +153,18 @@ jobs:
         key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
     - name: Check documentation
       run: RUSTDOCFLAGS="-D warnings" cargo doc --no-deps
+
+  wasm-build:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Install Rust with Wasm target
+      uses: dtolnay/rust-toolchain@stable
+      with:
+        targets: wasm32-unknown-unknown
+    - name: Install wasm-pack
+      run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+    - name: Build Wasm
+      run: wasm-pack build --target web
+      working-directory: crates/tonic-music-wasm

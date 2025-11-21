@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>Tonic Music Calculator</title>
+    <style>
+        :root {
+            --primary: #0d6efd;
+            --bg: #f8f9fa;
+            --text: #212529;
+            --card-bg: #ffffff;
+            --accent: #e9ecef;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem;
+            line-height: 1.5;
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--primary);
+            margin-bottom: 2rem;
+        }
+
+        .card {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            margin-bottom: 2rem;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            align-items: end;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #6c757d;
+        }
+
+        select, input[type="text"] {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ced4da;
+            border-radius: 6px;
+            font-size: 1rem;
+            background-color: #fff;
+            transition: border-color 0.2s;
+            box-sizing: border-box;
+        }
+
+        select:focus, input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.1);
+        }
+
+        button#calculate {
+            width: 100%;
+            padding: 0.75rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.1s;
+        }
+
+        button#calculate:hover {
+            background: #0b5ed7;
+        }
+
+        button#calculate:active {
+            transform: translateY(1px);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* Results Styling */
+        #result {
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .result-header {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 1.5rem;
+            color: var(--primary);
+            border-bottom: 2px solid var(--accent);
+            padding-bottom: 0.5rem;
+        }
+
+        /* Note Balls */
+        .note-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            justify-content: center;
+        }
+
+        .note-ball {
+            width: 3rem;
+            height: 3rem;
+            background: var(--primary);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.1rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Tables */
+        .table-container {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+            font-size: 0.95rem;
+        }
+
+        th, td {
+            padding: 0.75rem 1rem;
+            text-align: left;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        th {
+            background-color: var(--accent);
+            font-weight: 600;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover {
+            background-color: #f1f3f5;
+        }
+
+        .chord-symbol {
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        .degree-badge {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            background: #e9ecef;
+            border-radius: 4px;
+            font-family: monospace;
+            font-weight: bold;
+        }
+
+        .error-box {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 1rem;
+            border-radius: 6px;
+            border: 1px solid #f5c6cb;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid #dee2e6;
+            font-size: 0.9rem;
+            color: #6c757d;
+        }
+
+        footer a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+<h1>Tonic Music Calculator</h1>
+
+<div class="card">
+    <div class="form-grid">
+        <div class="form-group">
+            <label for="command">Command</label>
+            <select id="command">
+                <option value="scale">Scale</option>
+                <option value="chord">Chord</option>
+                <option value="harmonize">Harmonize</option>
+                <option value="progression">Progression</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="root">Root Note</label>
+            <input id="root" placeholder="e.g. C, F#" type="text" value="C">
+        </div>
+    </div>
+
+    <div class="options form-grid" id="scale-options">
+        <div class="form-group" style="grid-column: 1 / -1;">
+            <label for="scale-type">Scale Type</label>
+            <select id="scale-type">
+                <option value="major">Major</option>
+                <option value="minor">Minor (Natural)</option>
+                <option value="harmonic">Harmonic Minor</option>
+                <option value="penta-major">Pentatonic Major</option>
+                <option value="penta-minor">Pentatonic Minor</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="options hidden form-grid" id="chord-options">
+        <div class="form-group" style="grid-column: span 2;">
+            <label for="chord-type">Chord Type</label>
+            <select id="chord-type">
+                <option value="major">Major</option>
+                <option value="minor">Minor</option>
+                <option value="dim">Diminished</option>
+                <option value="aug">Augmented</option>
+                <option value="maj7">Major 7</option>
+                <option value="m7">Minor 7</option>
+                <option value="dom7">Dominant 7</option>
+                <option value="m7b5">Minor 7b5</option>
+                <option value="dim7">Diminished 7</option>
+            </select>
+        </div>
+        <div class="form-group" style="align-self: center; margin-bottom: 1.5rem;">
+            <label style="cursor: pointer; display: flex; align-items: center; text-transform: none;">
+                <input id="inversions" style="width: auto; margin-right: 0.5rem;" type="checkbox"> Show Inversions
+            </label>
+        </div>
+    </div>
+
+    <div class="options hidden" id="harmonize-options">
+        <div class="form-group">
+            <label style="cursor: pointer; display: flex; align-items: center; text-transform: none;">
+                <input id="sevenths" style="width: auto; margin-right: 0.5rem;" type="checkbox"> Use 7th Chords
+            </label>
+        </div>
+    </div>
+
+    <div class="options hidden form-grid" id="progression-options">
+        <div class="form-group" style="grid-column: 1 / -1;">
+            <label for="formula">Formula</label>
+            <select id="formula">
+                <option value="circle">Circle (I-vi-ii-V7)</option>
+                <option value="block">Block (I-V7-I7-IV)</option>
+            </select>
+        </div>
+    </div>
+
+    <button id="calculate">Calculate</button>
+</div>
+
+<div class="card hidden" id="result-card">
+    <div id="result"></div>
+</div>
+
+<script type="module">
+    import init, {get_scale, get_chord, get_harmonization, get_progression} from './pkg/tonic_music_wasm.js';
+
+    // ... (JS code remains the same) ...
+    // Helper to format notes array [C, E, G] -> HTML
+    const renderNotes = (notes) => {
+        return `<div class="note-container">
+                ${notes.map(n => `<div class="note-ball">${n}</div>`).join('')}
+            </div>`;
+    };
+
+    // Helper to format chord type enum to symbol
+    const getQuality = (type) => {
+        const map = {
+            'Major': '', 'Minor': 'm', 'Diminished': '°', 'Augmented': '+',
+            'Major7': 'maj7', 'Minor7': 'm7', 'Dominant7': '7',
+            'Minor7b5': 'm7b5', 'Diminished7': '°7',
+            'MinorMajor7': 'm(maj7)', 'AugmentedMajor7': 'aug(maj7)'
+        };
+        return map[type] || type;
+    };
+
+    // Renderers
+    const renderScaleResult = (data, title) => {
+        return `
+                <div class="result-header">${title}</div>
+                ${renderNotes(data)}
+            `;
+    };
+
+    const renderChordResult = (data, title, inversions) => {
+        let html = `<div class="result-header">${title}</div>`;
+        if (inversions) {
+            const titles = ["Root Position", "1st Inversion", "2nd Inversion", "3rd Inversion"];
+            data.forEach((notes, i) => {
+                html += `<h4 style="margin: 1rem 0 0.5rem; color: #666;">${titles[i] || 'Inversion'}</h4>`;
+                html += renderNotes(notes);
+            });
+        } else {
+            html += renderNotes(data);
+        }
+        return html;
+    };
+
+    const renderTableResult = (data, title, type) => {
+        const romanMap = ["I", "II", "III", "IV", "V", "VI", "VII"];
+        let html = `<div class="result-header">${title}</div>`;
+        html += `<div class="table-container"><table><thead><tr>
+                <th>Degree</th><th>Root</th><th>Chord</th><th>Notes</th>
+            </tr></thead><tbody>`;
+
+        data.forEach(item => {
+            // ProgressionChord uses 'degree' string, Harmonized uses 'degree' int
+            let degreeDisplay = item.degree;
+            if (typeof item.degree === 'number') {
+                degreeDisplay = romanMap[item.degree - 1] || item.degree;
+            }
+
+            const quality = getQuality(item.chord_type);
+            const chordSymbol = `${item.root_note}<span style="font-size:0.8em">${quality}</span>`;
+
+            html += `<tr>
+                    <td><span class="degree-badge">${degreeDisplay}</span></td>
+                    <td><b>${item.root_note}</b></td>
+                    <td class="chord-symbol">${chordSymbol}</td>
+                    <td>${item.notes.join(' - ')}</td>
+                </tr>`;
+        });
+
+        html += `</tbody></table></div>`;
+        return html;
+    };
+
+    async function main() {
+        try {
+            await init();
+        } catch (e) {
+            document.body.innerHTML = `<div class="error-box">Error loading Wasm. Please run <code>wasm-pack build --target web</code></div>`;
+            return;
+        }
+
+        const commandSelect = document.getElementById('command');
+        const btn = document.getElementById('calculate');
+        const resultDiv = document.getElementById('result');
+        const resultCard = document.getElementById('result-card');
+
+        const updateUI = () => {
+            document.querySelectorAll('.options').forEach(el => el.classList.add('hidden'));
+            const val = commandSelect.value;
+
+            // Logic to handle specific fields
+            if (val === 'scale') {
+                document.getElementById('scale-options').classList.remove('hidden');
+                // Show all scale types
+                document.querySelectorAll('#scale-type option').forEach(opt => opt.hidden = false);
+            } else if (val === 'chord') {
+                document.getElementById('chord-options').classList.remove('hidden');
+            } else if (val === 'harmonize') {
+                document.getElementById('scale-options').classList.remove('hidden');
+                document.getElementById('harmonize-options').classList.remove('hidden');
+
+                // Hide pentatonic scales for harmonization (as core doesn't support 5-note harmonization yet)
+                const scaleSelect = document.getElementById('scale-type');
+                const pentas = ['penta-major', 'penta-minor'];
+
+                document.querySelectorAll('#scale-type option').forEach(opt => {
+                    if (pentas.includes(opt.value)) {
+                        opt.hidden = true;
+                    } else {
+                        opt.hidden = false;
+                    }
+                });
+
+                // If current selection is hidden, reset to Major
+                if (pentas.includes(scaleSelect.value)) {
+                    scaleSelect.value = 'major';
+                }
+            } else if (val === 'progression') {
+                document.getElementById('progression-options').classList.remove('hidden');
+            }
+        };
+        commandSelect.addEventListener('change', updateUI);
+        updateUI();
+
+        btn.addEventListener('click', () => {
+            resultDiv.innerHTML = '';
+            resultCard.classList.add('hidden');
+
+            const cmd = commandSelect.value;
+            const root = document.getElementById('root').value;
+
+            try {
+                let html = "";
+                if (cmd === 'scale') {
+                    const type = document.getElementById('scale-type').value;
+                    const data = get_scale(root, type);
+                    html = renderScaleResult(data, `${root} ${type} Scale`);
+                } else if (cmd === 'chord') {
+                    const type = document.getElementById('chord-type').value;
+                    const inv = document.getElementById('inversions').checked;
+                    const data = get_chord(root, type, inv);
+                    html = renderChordResult(data, `${root} ${type} Chord`, inv);
+                } else if (cmd === 'harmonize') {
+                    const type = document.getElementById('scale-type').value;
+                    const sevenths = document.getElementById('sevenths').checked;
+                    const data = get_harmonization(root, type, sevenths);
+                    html = renderTableResult(data, `${root} ${type} Harmonization`, 'harmonize');
+                } else if (cmd === 'progression') {
+                    const formula = document.getElementById('formula').value;
+                    const data = get_progression(root, formula);
+                    html = renderTableResult(data, `${root} ${formula} Progression`, 'progression');
+                }
+
+                resultDiv.innerHTML = html;
+                resultCard.classList.remove('hidden');
+            } catch (e) {
+                resultDiv.innerHTML = `<div class="error-box"><strong>Error:</strong> ${e}</div>`;
+                resultCard.classList.remove('hidden');
+            }
+        });
+    }
+
+    main();
+</script>
+
+<footer>
+    <p>
+        &copy; 2025 Tonic Music Calculator.
+        Licensed under <a href="https://www.gnu.org/licenses/agpl-3.0.html" target="_blank">AGPL v3.0</a>.
+    </p>
+    <p>
+        Source code available on <a href="https://github.com/airvzxf/music-theory-calculator" target="_blank">GitHub</a>.
+    </p>
+</footer>
+</body>
+</html>

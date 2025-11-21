@@ -1,0 +1,61 @@
+use clap::ValueEnum;
+use serde_wasm_bindgen::to_value;
+use tonic_music_core::{
+    ChordType, HarmonicFormula, ScaleType, build_chord, build_progression, build_scale,
+    get_inversions, harmonize_scale, parser::parse_note,
+};
+use wasm_bindgen::prelude::*;
+
+#[wasm_bindgen]
+pub fn get_scale(root: &str, scale_type: &str) -> Result<JsValue, JsValue> {
+    let root_note = parse_note(root).map_err(|e| JsValue::from_str(&e))?;
+
+    let scale = ScaleType::from_str(scale_type, true)
+        .map_err(|e| JsValue::from_str(&format!("Invalid scale type: {}", e)))?;
+
+    let notes = build_scale(root_note, scale);
+
+    Ok(to_value(&notes)?)
+}
+
+#[wasm_bindgen]
+pub fn get_chord(root: &str, chord_type: &str, inversions: bool) -> Result<JsValue, JsValue> {
+    let root_note = parse_note(root).map_err(|e| JsValue::from_str(&e))?;
+
+    let chord = ChordType::from_str(chord_type, true)
+        .map_err(|e| JsValue::from_str(&format!("Invalid chord type: {}", e)))?;
+
+    let notes = build_chord(root_note, chord);
+
+    if inversions {
+        let all_inversions = get_inversions(&notes);
+        Ok(to_value(&all_inversions)?)
+    } else {
+        Ok(to_value(&notes)?)
+    }
+}
+
+#[wasm_bindgen]
+pub fn get_harmonization(root: &str, scale_type: &str, sevenths: bool) -> Result<JsValue, JsValue> {
+    let root_note = parse_note(root).map_err(|e| JsValue::from_str(&e))?;
+
+    let scale = ScaleType::from_str(scale_type, true)
+        .map_err(|e| JsValue::from_str(&format!("Invalid scale type: {}", e)))?;
+
+    let scale_notes = build_scale(root_note, scale);
+    let harmony = harmonize_scale(&scale_notes, sevenths);
+
+    Ok(to_value(&harmony)?)
+}
+
+#[wasm_bindgen]
+pub fn get_progression(root: &str, formula: &str) -> Result<JsValue, JsValue> {
+    let root_note = parse_note(root).map_err(|e| JsValue::from_str(&e))?;
+
+    let formula_enum = HarmonicFormula::from_str(formula, true)
+        .map_err(|e| JsValue::from_str(&format!("Invalid formula: {}", e)))?;
+
+    let progression = build_progression(root_note, formula_enum);
+
+    Ok(to_value(&progression)?)
+}

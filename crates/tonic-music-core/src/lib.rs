@@ -28,6 +28,8 @@
 use clap::ValueEnum;
 use serde::Serialize;
 
+pub mod parser;
+
 // 'derive' gives us "free" functionality for this enum.
 // Copy/Clone: Lets us easily copy the note (e.g., let note2 = note1;)
 // PartialEq/Eq: Lets us compare them (e.g., if note1 == Note::C { ... })

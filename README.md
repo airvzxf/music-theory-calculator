@@ -14,17 +14,34 @@ Ensure you have Rust and Cargo installed.
 
 1.  Clone the repository:
     ```bash
-    git clone [https://github.com/airvzxf/music-theory-calculator.git](https://github.com/airvzxf/music-theory-calculator.git)
-    ```
-2.  Navigate to the project directory:
-    ```bash
+    git clone https://github.com/airvzxf/music-theory-calculator.git
     cd music-theory-calculator
     ```
-3.  Build and install the binary:
+2.  Build the project:
+    ```bash
+    make build
+    ```
+3.  Install the binary:
     ```bash
     cargo install --path crates/tonic-music-cli
     ```
-4.  You can now run `tonic-music` from anywhere.
+
+## 🌐 Web App
+
+This project includes a WebAssembly (Wasm) version that runs directly in your browser.
+
+### Running Locally
+To build and serve the web interface locally:
+
+1.  Ensure you have `wasm-pack` installed:
+    ```bash
+    cargo install wasm-pack
+    ```
+2.  Run the serve command:
+    ```bash
+    make serve
+    ```
+3.  Open `http://localhost:8000` in your browser.
 
 ## ⚙️ Usage
 

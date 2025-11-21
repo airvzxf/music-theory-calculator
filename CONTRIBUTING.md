@@ -47,17 +47,27 @@ These contributions are incredibly helpful! Feel free to open an issue or a Pull
 If you're ready to write some code, here is the basic workflow:
 
 ### Development Setup
-To ensure code quality and consistency, this project uses `pre-commit` hooks. These hooks run automatically before each commit to format, lint, and test the code.
+To ensure code quality and consistency, this project uses `pre-commit` hooks and a `Makefile` for common tasks.
 
 1.  **Install pre-commit:** Follow the official [installation guide](https://pre-commit.com/#installation). A common method is using pip:
     ```bash
     pip install pre-commit
     ```
-2.  **Set up the hooks:** In the root of the project, run:
+2.  **Install wasm-pack (Optional):** If you plan to work on the Web App, you need `wasm-pack`:
+    ```bash
+    cargo install wasm-pack
+    ```
+3.  **Set up the hooks:** In the root of the project, run:
     ```bash
     pre-commit install
     ```
     Now, the checks will run automatically every time you run `git commit`.
+
+### Common Commands (Makefile)
+We provide a `Makefile` to simplify development tasks:
+*   `make build`: Build the entire workspace.
+*   `make test`: Run all tests.
+*   `make serve`: Build the Wasm module and serve the web demo locally.
 
 ### Contribution Workflow
 1.  **Fork** the repository.

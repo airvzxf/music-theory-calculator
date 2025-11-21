@@ -19,31 +19,31 @@
  */
 
 /*
- * crates/tonic-music-cli/src/parser.rs
+ * crates/tonic-music-core/src/parser.rs
  *
  * This module handles parsing user input strings
  * into our library's enums.
  */
 
 // We need to import the types from our library
-use tonic_music_core::Note;
+use crate::Note;
 
-/// Parses a string into a Note enum. Panics if invalid.
-pub fn parse_note(s: &str) -> Note {
+/// Parses a string into a Note enum. Returns Err if invalid.
+pub fn parse_note(s: &str) -> Result<Note, String> {
     match s.to_lowercase().as_str() {
-        "c" => Note::C,
-        "c#" | "db" => Note::CSharp,
-        "d" => Note::D,
-        "d#" | "eb" => Note::DSharp,
-        "e" => Note::E,
-        "f" => Note::F,
-        "f#" | "gb" => Note::FSharp,
-        "g" => Note::G,
-        "g#" | "ab" => Note::GSharp,
-        "a" => Note::A,
-        "a#" | "bb" => Note::ASharp,
-        "b" => Note::B,
-        _ => panic!("Invalid root note: {}", s),
+        "c" => Ok(Note::C),
+        "c#" | "db" => Ok(Note::CSharp),
+        "d" => Ok(Note::D),
+        "d#" | "eb" => Ok(Note::DSharp),
+        "e" => Ok(Note::E),
+        "f" => Ok(Note::F),
+        "f#" | "gb" => Ok(Note::FSharp),
+        "g" => Ok(Note::G),
+        "g#" | "ab" => Ok(Note::GSharp),
+        "a" => Ok(Note::A),
+        "a#" | "bb" => Ok(Note::ASharp),
+        "b" => Ok(Note::B),
+        _ => Err(format!("Invalid root note: {}", s)),
     }
 }
 
@@ -52,34 +52,31 @@ mod tests {
     // We import the parsing functions from the parent module (parser.rs)
     use super::*;
     // We also need the library's enums for comparison.
-    use tonic_music_core::Note;
+    use crate::Note;
 
     #[test]
     fn test_parse_note_simple() {
-        assert_eq!(parse_note("C"), Note::C);
-        assert_eq!(parse_note("E"), Note::E);
+        assert_eq!(parse_note("C"), Ok(Note::C));
+        assert_eq!(parse_note("E"), Ok(Note::E));
     }
 
     #[test]
     fn test_parse_note_case_insensitive() {
-        assert_eq!(parse_note("c"), Note::C); // Lower case
-        assert_eq!(parse_note("f#"), Note::FSharp); // Lowercase sharp
-        assert_eq!(parse_note("Db"), Note::CSharp); // Capital letter flat
+        assert_eq!(parse_note("c"), Ok(Note::C)); // Lower case
+        assert_eq!(parse_note("f#"), Ok(Note::FSharp)); // Lowercase sharp
+        assert_eq!(parse_note("Db"), Ok(Note::CSharp)); // Capital letter flat
     }
 
     #[test]
     fn test_parse_note_aliases() {
-        assert_eq!(parse_note("C#"), Note::CSharp);
-        assert_eq!(parse_note("Db"), Note::CSharp); // Alias Db -> CSharp
-        assert_eq!(parse_note("Eb"), Note::DSharp); // Alias Eb -> DSharp
-        assert_eq!(parse_note("bb"), Note::ASharp); // Alias bb -> ASharp
+        assert_eq!(parse_note("C#"), Ok(Note::CSharp));
+        assert_eq!(parse_note("Db"), Ok(Note::CSharp)); // Alias Db -> CSharp
+        assert_eq!(parse_note("Eb"), Ok(Note::DSharp)); // Alias Eb -> DSharp
+        assert_eq!(parse_note("bb"), Ok(Note::ASharp)); // Alias bb -> ASharp
     }
 
     #[test]
-    #[should_panic]
     fn test_parse_note_invalid() {
-        // This test *passes* if the code panics.
-        // which is what we want.
-        parse_note("H");
+        assert!(parse_note("H").is_err());
     }
 }

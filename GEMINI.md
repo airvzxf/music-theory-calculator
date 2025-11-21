@@ -45,6 +45,7 @@ The project is structured as a **Cargo Workspace** with two main crates:
 ### Prerequisites
 
 -   Rust and Cargo
+-   `wasm-pack` (for WebAssembly build): `cargo install wasm-pack`
 
 ### Building and Installation
 
@@ -52,13 +53,16 @@ The project is structured as a **Cargo Workspace** with two main crates:
     ```bash
     cd music-theory-calculator
     ```
-2.  Build and install the binary:
+2.  Build the entire workspace:
+    ```bash
+    make build
+    ```
+3.  Install the CLI binary:
     ```bash
     cargo install --path crates/tonic-music-cli
     ```
-    This will place the `tonic-music` executable in your Cargo bin path, making it available from anywhere in your terminal.
 
-### Running the application
+### Running the CLI application
 
 The tool has three main subcommands: `scale`, `chord`, and `harmonize`.
 
@@ -66,6 +70,17 @@ The tool has three main subcommands: `scale`, `chord`, and `harmonize`.
     ```bash
     tonic-music scale --root C --scale-type penta-major
     ```
+
+### Running the Web App
+
+To run the WebAssembly interface locally:
+
+1.  Build and serve the application:
+    ```bash
+    make serve
+    ```
+2.  Open your browser at `http://localhost:8000`.
+
 -   **Generate a chord with its inversions:**
     ```bash
     tonic-music chord -r F# -c min7 --inversions
