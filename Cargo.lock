@@ -259,7 +259,7 @@ dependencies = [
 
 [[package]]
 name = "tonic-music-cli"
-version = "2.0.0"
+version = "2.1.0"
 dependencies = [
  "clap",
  "serde",
@@ -269,7 +269,7 @@ dependencies = [
 
 [[package]]
 name = "tonic-music-core"
-version = "2.0.0"
+version = "2.1.0"
 dependencies = [
  "clap",
  "serde",
@@ -277,7 +277,7 @@ dependencies = [
 
 [[package]]
 name = "tonic-music-wasm"
-version = "2.0.0"
+version = "2.1.0"
 dependencies = [
  "clap",
  "serde",
