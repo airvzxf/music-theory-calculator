@@ -8,14 +8,14 @@ repos:
         description: Formats staged Rust files using 'cargo fmt' and re-stages them.
         # The framework passes the filenames to the end of this command.
         # "$@" is a placeholder for the list of staged files.
-        entry: bash -c 'cargo fmt --manifest-path src/tonic-music/Cargo.toml -- "$@" && git add "$@"' --
+        entry: bash -c 'cargo fmt -- "$@" && git add "$@"' --
         language: system
         types: [rust] # This ensures the hook only runs for .rs files
         stages: [pre-commit]
       - id: cargo-clippy
         name: cargo clippy
         description: Lints Rust files using 'cargo clippy'.
-        entry: cargo clippy --manifest-path src/tonic-music/Cargo.toml -- -D warnings
+        entry: cargo clippy --workspace -- -D warnings
         language: system
         types: [rust]
         pass_filenames: false
@@ -24,7 +24,7 @@ repos:
       - id: cargo-test
         name: cargo test
         description: Runs Rust unit tests and prevents commit if tests fail.
-        entry: cargo test --manifest-path src/tonic-music/Cargo.toml
+        entry: cargo test --workspace
         language: system
         pass_filenames: false
         always_run: true

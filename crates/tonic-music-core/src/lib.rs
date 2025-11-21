@@ -1,5 +1,5 @@
 /*
- * tonic-music
+ * tonic-music-core
  * Copyright (C) 2025 Israel Alberto Roldan Vega
  *
  * This program is free software: you can redistribute it and/or modify
@@ -19,7 +19,7 @@
  */
 
 /*
- * src/tonic-music/src/lib.rs
+ * crates/tonic-music-core/src/lib.rs
  *
  * This is our library crate. All music theory
  * logic will live here.

@@ -18,17 +18,19 @@ Ensure you have Rust and Cargo installed.
     ```
 2.  Navigate to the project directory:
     ```bash
-    cd music-theory-calculator/src/tonic-music
+    cd music-theory-calculator
     ```
 3.  Build and install the binary:
     ```bash
-    cargo install --path .
+    cargo install --path crates/tonic-music-cli
     ```
 4.  You can now run `tonic-music` from anywhere.
 
 ## ⚙️ Usage
 
 `tonic-music` provides three main commands: `scale`, `chord`, and `harmonize`.
+
+You can now choose the output format using the `--format` flag: `text` (default), `json`, or `markdown`.
 
 ### `scale`
 Generates the notes of a given scale. Now supports `major`, `minor`, `harmonic` (minor), and pentatonic (`penta-major`, `penta-minor`) scales.
@@ -38,11 +40,22 @@ Generates the notes of a given scale. Now supports `major`, `minor`, `harmonic` 
 tonic-music scale --root A --scale-type penta-minor
 ```
 
-**Output:**
-
+**Output (Text):**
 ```text
 --- A penta-minor Scale ---
 [A, C, D, E, G]
+```
+
+**Output (JSON):**
+```bash
+tonic-music scale --root A --scale-type penta-minor --format json
+```
+```json
+{
+  "root": "A",
+  "scale_type": "PentatonicMinor",
+  "notes": ["A", "C", "D", "E", "G"]
+}
 ```
 
 ### `chord`
@@ -124,8 +137,8 @@ IV:     F       -> [C, F, A]
 
 Contributions are welcome! Whether it's reporting a bug, suggesting a feature, or writing code, all help is appreciated.
 
-Please read our [CONTRIBUTING.md](https://www.google.com/search?q=CONTRIBUTING.md) for guidelines.
+Please read our [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
 ## 📜 License
 
-This project is licensed under the **GNU Affero General Public License v3.0 (AGPLv3)**. See the [LICENSE](https://www.google.com/search?q=LICENSE) file for details.
+This project is licensed under the **GNU Affero General Public License v3.0 (AGPLv3)**. See the [LICENSE](LICENSE) file for details.

@@ -1,5 +1,5 @@
 /*
- * tonic-music
+ * tonic-music-cli
  * Copyright (C) 2025 Israel Alberto Roldan Vega
  *
  * This program is free software: you can redistribute it and/or modify
@@ -19,14 +19,14 @@
  */
 
 /*
- * src/tonic-music/src/parser.rs
+ * crates/tonic-music-cli/src/parser.rs
  *
  * This module handles parsing user input strings
  * into our library's enums.
  */
 
 // We need to import the types from our library
-use tonic_music::Note;
+use tonic_music_core::Note;
 
 /// Parses a string into a Note enum. Panics if invalid.
 pub fn parse_note(s: &str) -> Note {
@@ -52,7 +52,7 @@ mod tests {
     // We import the parsing functions from the parent module (parser.rs)
     use super::*;
     // We also need the library's enums for comparison.
-    use tonic_music::Note;
+    use tonic_music_core::Note;
 
     #[test]
     fn test_parse_note_simple() {

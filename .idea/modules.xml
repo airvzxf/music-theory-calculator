@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/tonic-music.iml" filepath="$PROJECT_DIR$/.idea/tonic-music.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/music-theory-calculator.iml" filepath="$PROJECT_DIR$/.idea/music-theory-calculator.iml" />
     </modules>
   </component>
 </project>

@@ -1,0 +1,10 @@
+[package]
+name = "tonic-music-core"
+version = "2.0.0"
+edition = "2024"
+description = "Core music theory logic library"
+license = "AGPL-3.0"
+
+[dependencies]
+serde = { version = "1.0.228", features = ["derive"] }
+clap = { version = "4.5.53", features = ["derive"] }

@@ -22,14 +22,12 @@ jobs:
         path: |
           ~/.cargo/registry
           ~/.cargo/git
-          src/tonic-music/target
-        key: ${{ runner.os }}-cargo-${{ hashFiles('**/src/tonic-music/Cargo.lock') }}
+          target
+        key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
     - name: Check formatting
       run: cargo fmt -- --check
-      working-directory: src/tonic-music
     - name: Run clippy
       run: cargo clippy -- -D warnings
-      working-directory: src/tonic-music
 
   build:
     needs: lint
@@ -44,11 +42,10 @@ jobs:
         path: |
           ~/.cargo/registry
           ~/.cargo/git
-          src/tonic-music/target
-        key: ${{ runner.os }}-cargo-${{ hashFiles('**/src/tonic-music/Cargo.lock') }}
+          target
+        key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
     - name: Build
       run: cargo build --verbose
-      working-directory: src/tonic-music
 
   test:
     needs: build
@@ -66,11 +63,10 @@ jobs:
         path: |
           ~/.cargo/registry
           ~/.cargo/git
-          src/tonic-music/target
-        key: ${{ runner.os }}-cargo-${{ hashFiles('**/src/tonic-music/Cargo.lock') }}
+          target
+        key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
     - name: Run tests
       run: cargo test --verbose
-      working-directory: src/tonic-music
 
   audit:
     needs: build
@@ -85,8 +81,8 @@ jobs:
         path: |
           ~/.cargo/registry
           ~/.cargo/git
-          src/tonic-music/target
-        key: ${{ runner.os }}-cargo-${{ hashFiles('**/src/tonic-music/Cargo.lock') }}
+          target
+        key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
     - name: Cache cargo-audit
       uses: actions/cache@v4
       with:
@@ -99,7 +95,6 @@ jobs:
           cargo install cargo-audit
         fi
         cargo audit
-      working-directory: src/tonic-music
 
   msrv-check:
     needs: build
@@ -116,11 +111,10 @@ jobs:
         path: |
           ~/.cargo/registry
           ~/.cargo/git
-          src/tonic-music/target
-        key: ${{ runner.os }}-cargo-msrv-${{ hashFiles('**/src/tonic-music/Cargo.lock') }}
+          target
+        key: ${{ runner.os }}-cargo-msrv-${{ hashFiles('**/Cargo.lock') }}
     - name: Build with MSRV
       run: cargo build --verbose
-      working-directory: src/tonic-music
 
   feature-check:
     needs: build
@@ -135,14 +129,12 @@ jobs:
         path: |
           ~/.cargo/registry
           ~/.cargo/git
-          src/tonic-music/target
-        key: ${{ runner.os }}-cargo-${{ hashFiles('**/src/tonic-music/Cargo.lock') }}
+          target
+        key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
     - name: Test with no default features
       run: cargo test --no-default-features --verbose
-      working-directory: src/tonic-music
     - name: Test with all features
       run: cargo test --all-features --verbose
-      working-directory: src/tonic-music
 
   doc-check:
     needs: build
@@ -157,8 +149,7 @@ jobs:
         path: |
           ~/.cargo/registry
           ~/.cargo/git
-          src/tonic-music/target
-        key: ${{ runner.os }}-cargo-${{ hashFiles('**/src/tonic-music/Cargo.lock') }}
+          target
+        key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
     - name: Check documentation
       run: RUSTDOCFLAGS="-D warnings" cargo doc --no-deps
-      working-directory: src/tonic-music

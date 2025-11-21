@@ -1,5 +1,5 @@
 /*
- * tonic-music
+ * tonic-music-cli
  * Copyright (C) 2025 Israel Alberto Roldan Vega
  *
  * This program is free software: you can redistribute it and/or modify
@@ -19,7 +19,7 @@
  */
 
 /*
- * src/tonic-music/src/cli.rs
+ * crates/tonic-music-cli/src/cli.rs
  *
  * This module defines the command-line interface
  * structure using clap.
@@ -27,7 +27,7 @@
 
 use clap::{Parser, ValueEnum};
 use serde::Serialize;
-use tonic_music::{ChordType, HarmonicFormula, ScaleType};
+use tonic_music_core::{ChordType, HarmonicFormula, ScaleType};
 
 /// Available output formats
 #[derive(ValueEnum, Clone, Debug, Default, Serialize)]

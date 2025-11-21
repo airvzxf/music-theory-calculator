@@ -1,0 +1,6 @@
+[workspace]
+members = [
+    "crates/tonic-music-core",
+    "crates/tonic-music-cli",
+]
+resolver = "2"

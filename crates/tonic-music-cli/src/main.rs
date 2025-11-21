@@ -1,5 +1,5 @@
 /*
- * tonic-music
+ * tonic-music-cli
  * Copyright (C) 2025 Israel Alberto Roldan Vega
  *
  * This program is free software: you can redistribute it and/or modify
@@ -19,7 +19,7 @@
  */
 
 /*
- * src/tonic-music/src/main.rs
+ * crates/tonic-music-cli/src/main.rs
  *
  * This is our binary crate. It will only be
  * responsible for parsing user commands and calling our library.
@@ -28,7 +28,7 @@
 use clap::Parser;
 use serde::Serialize;
 // Import our library's functions and structs
-use tonic_music::{
+use tonic_music_core::{
     ChordType, HarmonizedDegree, Note, ProgressionChord, build_chord, build_progression,
     build_scale, get_inversions, harmonize_scale,
 };

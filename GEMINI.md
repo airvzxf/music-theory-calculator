@@ -36,7 +36,9 @@ You are a world-class software architect specializing in the technology stack de
 
 This project is a command-line music theory calculator named `tonic-music`. It is written in Rust and provides functionalities to generate musical scales (including major, minor, and pentatonic), chords (including triads and a variety of seventh chords), chord inversions, and full scale harmonizations with triads or seventh chords. The tool is designed for musicians and developers who need quick music theory calculations from the terminal.
 
-The project is structured into a binary crate and a library crate. The binary (`main.rs`, `cli.rs`, `parser.rs`) handles command-line argument parsing using the `clap` library, while the core music theory logic (defining notes, scales, chords, and harmonization) resides in the library (`lib.rs`).
+The project is structured as a **Cargo Workspace** with two main crates:
+*   `crates/tonic-music-core`: The pure library crate containing all music theory logic and data structures (`Note`, `ScaleType`, `ChordType`). It has minimal dependencies.
+*   `crates/tonic-music-cli`: The binary crate that handles command-line argument parsing using `clap` and formatting.
 
 ## Building and Running
 
@@ -46,13 +48,13 @@ The project is structured into a binary crate and a library crate. The binary (`
 
 ### Building and Installation
 
-1.  Navigate to the project's source directory:
+1.  Navigate to the project's root directory:
     ```bash
-    cd src/tonic-music
+    cd music-theory-calculator
     ```
 2.  Build and install the binary:
     ```bash
-    cargo install --path .
+    cargo install --path crates/tonic-music-cli
     ```
     This will place the `tonic-music` executable in your Cargo bin path, making it available from anywhere in your terminal.
 
@@ -80,11 +82,9 @@ The tool has three main subcommands: `scale`, `chord`, and `harmonize`.
 
 ## Development Conventions
 
--   **Structure:** The project follows a clear separation of concerns.
-    -   `main.rs`: Entry point, handles command parsing and calls the library.
-    -   `lib.rs`: Core library with all music theory logic and data structures (`Note`, `ScaleType`, `ChordType`).
-    -   `cli.rs`: Defines the command-line interface structure using `clap`.
-    -   `parser.rs`: Handles parsing of user input strings into the library's data structures.
+-   **Structure:** The project follows a Cargo Workspace structure.
+    -   `crates/tonic-music-core`: Core library with all music theory logic.
+    -   `crates/tonic-music-cli`: CLI application handling user input and output.
 -   **Error Handling:** The application currently uses `panic!` for invalid user input (e.g., an unrecognized note or scale type).
 -   **Continuous Integration:** The project uses a comprehensive GitHub Actions CI pipeline that runs on every push and pull request to the `main` branch. The pipeline enforces code quality and correctness through a series of jobs:
     -   **Linting:** Checks code formatting (`cargo fmt`) and style (`cargo clippy`).
@@ -93,6 +93,6 @@ The tool has three main subcommands: `scale`, `chord`, and `harmonize`.
     -   **Security Audit:** Scans dependencies for known vulnerabilities (`cargo audit`).
     -   **MSRV Check:** Verifies that the project compiles with the Minimum Supported Rust Version.
     -   **Documentation Check:** Ensures all public APIs are documented (`cargo doc`).
--   **Testing:** The project includes a suite of unit tests within the `lib.rs` and `parser.rs` files, located in `#[cfg(test)]` modules. These tests cover the core music theory logic and input parsing.
+-   **Testing:** The project includes a suite of unit tests within the library and parser modules. These tests cover the core music theory logic and input parsing.
 -   **Contributing:** The `CONTRIBUTING.md` file should be consulted for contribution guidelines.
 -   **License:** The project is licensed under the AGPL v3.0.
