@@ -173,6 +173,35 @@ I7:     C 7     -> [C, E, G, A#]
 IV:     F       -> [C, F, A]
 ```
 
+**Command:**
+```bash
+tonic-music progression --root C --formula guajira
+```
+
+**Output:**
+
+```text
+--- C guajira Progression ---
+I:      C       -> [C, E, G]
+IV:     F       -> [C, F, A]
+V7:     G 7     -> [B, D, F, G]
+```
+
+**Command:**
+```bash
+tonic-music progression --root C --formula bloque-rm
+```
+
+**Output:**
+
+```text
+--- C bloque-rm Progression ---
+vi:     A m     -> [A, C, E]
+IV7:    F 7     -> [A, C, D#, F]
+ii:     D m     -> [A, D, F]
+III7:   E 7     -> [G#, B, D, E]
+```
+
 ## 🤝 Contributing
 
 Contributions are welcome! Whether it's reporting a bug, suggesting a feature, or writing code, all help is appreciated.

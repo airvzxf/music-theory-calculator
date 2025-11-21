@@ -447,6 +447,11 @@ pub enum HarmonicFormula {
     Block,
     /// A diatonic I-vi-ii-V7 "Circle" progression
     Circle,
+    /// A I-IV-V7 progression common in Guajira music
+    Guajira,
+    /// A relative minor block: vi-IV7-ii-III7
+    #[value(alias("bloque-rm"))]
+    BloqueRm,
 }
 
 /// Represents a single chord within a progression
@@ -526,6 +531,8 @@ pub fn build_progression(root: Note, formula: HarmonicFormula) -> Vec<Progressio
     let chord_specs = match formula {
         HarmonicFormula::Block => get_block_progression_spec(root),
         HarmonicFormula::Circle => get_circle_progression_spec(root),
+        HarmonicFormula::Guajira => get_guajira_progression_spec(root),
+        HarmonicFormula::BloqueRm => get_bloque_rm_progression_spec(root),
     };
 
     let mut progression = Vec::new();
@@ -611,6 +618,49 @@ fn get_circle_progression_spec(root: Note) -> Vec<(String, Note, ChordType)> {
         (
             "V7".to_string(),
             transpose(root, Interval::PerfectFifth),
+            ChordType::Dominant7,
+        ),
+    ]
+}
+
+/// Returns the chord specifications for the I-IV-V7 "Guajira" progression.
+fn get_guajira_progression_spec(root: Note) -> Vec<(String, Note, ChordType)> {
+    vec![
+        ("I".to_string(), root, ChordType::Major),
+        (
+            "IV".to_string(),
+            transpose(root, Interval::PerfectFourth),
+            ChordType::Major,
+        ),
+        (
+            "V7".to_string(),
+            transpose(root, Interval::PerfectFifth),
+            ChordType::Dominant7,
+        ),
+    ]
+}
+
+/// Returns the chord specifications for the vi-IV7-ii-III7 "Bloque R.m." progression.
+fn get_bloque_rm_progression_spec(root: Note) -> Vec<(String, Note, ChordType)> {
+    vec![
+        (
+            "vi".to_string(),
+            transpose(root, Interval::MajorSixth),
+            ChordType::Minor,
+        ),
+        (
+            "IV7".to_string(),
+            transpose(root, Interval::PerfectFourth),
+            ChordType::Dominant7,
+        ),
+        (
+            "ii".to_string(),
+            transpose(root, Interval::MajorSecond),
+            ChordType::Minor,
+        ),
+        (
+            "III7".to_string(),
+            transpose(root, Interval::MajorThird),
             ChordType::Dominant7,
         ),
     ]
@@ -888,6 +938,42 @@ mod tests {
         assert_eq!(
             progression[3].notes,
             vec![Note::B, Note::D, Note::F, Note::G]
+        );
+    }
+
+    #[test]
+    fn test_lib_build_guajira_progression_c() {
+        let progression = build_progression(Note::C, HarmonicFormula::Guajira);
+
+        // I, IV, V7
+        let roots: Vec<Note> = progression.iter().map(|c| c.root_note).collect();
+        assert_eq!(roots, vec![Note::C, Note::F, Note::G]);
+
+        let types: Vec<ChordType> = progression.iter().map(|c| c.chord_type).collect();
+        assert_eq!(
+            types,
+            vec![ChordType::Major, ChordType::Major, ChordType::Dominant7]
+        );
+    }
+
+    #[test]
+    fn test_lib_build_bloque_rm_progression_c() {
+        let progression = build_progression(Note::C, HarmonicFormula::BloqueRm);
+
+        // vi, IV7, ii, III7
+        // C Major -> A, F, D, E
+        let roots: Vec<Note> = progression.iter().map(|c| c.root_note).collect();
+        assert_eq!(roots, vec![Note::A, Note::F, Note::D, Note::E]);
+
+        let types: Vec<ChordType> = progression.iter().map(|c| c.chord_type).collect();
+        assert_eq!(
+            types,
+            vec![
+                ChordType::Minor,
+                ChordType::Dominant7,
+                ChordType::Minor,
+                ChordType::Dominant7
+            ]
         );
     }
 }
