@@ -43,6 +43,27 @@ To build and serve the web interface locally:
     ```
 3.  Open `http://localhost:8000` in your browser.
 
+### Self-Hosting
+To host the application on your own server (Apache, Nginx, Vercel, etc.):
+
+1.  Build the Wasm module:
+    ```bash
+    cd crates/tonic-music-wasm
+    wasm-pack build --target web
+    ```
+2.  Upload the following files to your web server:
+    *   `index.html`
+    *   The entire `pkg/` folder created by the build command.
+
+Ensure your server structure looks like this:
+```
+/www
+  ├── index.html
+  └── pkg/
+      ├── tonic_music_wasm.js
+      └── tonic_music_wasm_bg.wasm
+```
+
 ## ⚙️ Usage
 
 `tonic-music` provides three main commands: `scale`, `chord`, and `harmonize`.
