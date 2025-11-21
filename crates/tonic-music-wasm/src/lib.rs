@@ -59,3 +59,8 @@ pub fn get_progression(root: &str, formula: &str) -> Result<JsValue, JsValue> {
 
     Ok(to_value(&progression)?)
 }
+
+#[wasm_bindgen]
+pub fn get_version() -> String {
+    env!("CARGO_PKG_VERSION").to_string()
+}

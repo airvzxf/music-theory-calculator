@@ -303,7 +303,7 @@
 </div>
 
 <script type="module">
-    import init, {get_scale, get_chord, get_harmonization, get_progression} from './pkg/tonic_music_wasm.js';
+    import init, {get_scale, get_chord, get_harmonization, get_progression, get_version} from './pkg/tonic_music_wasm.js';
 
     // ... (JS code remains the same) ...
     // Helper to format notes array [C, E, G] -> HTML
@@ -378,6 +378,7 @@
     async function main() {
         try {
             await init();
+            document.getElementById('version-display').innerText = `v${get_version()}`;
         } catch (e) {
             document.body.innerHTML = `<div class="error-box">Error loading Wasm. Please run <code>wasm-pack build --target web</code></div>`;
             return;
@@ -469,7 +470,7 @@
 
 <footer>
     <p>
-        &copy; 2025 Tonic Music Calculator.
+        &copy; 2025 Tonic Music Calculator <span id="version-display"></span>.
         Licensed under <a href="https://www.gnu.org/licenses/agpl-3.0.html" target="_blank">AGPL v3.0</a>.
     </p>
     <p>
