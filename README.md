@@ -206,13 +206,13 @@ V7:     G 7     -> [B, D, F, G]
 
 **Command:**
 ```bash
-tonic-music progression --root C --formula bloque-rm
+tonic-music progression --root C --formula minor-block
 ```
 
 **Output:**
 
 ```text
---- C bloque-rm Progression ---
+--- C MinorBlock Progression ---
 vi:     A m     -> [C, E, A]
 IV7:    F 7     -> [C, D#, F, A]
 ii:     D m     -> [D, F, A]

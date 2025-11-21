@@ -450,8 +450,8 @@ pub enum HarmonicFormula {
     /// A I-IV-V7 progression common in Guajira music
     Guajira,
     /// A relative minor block: vi-IV7-ii-III7
-    #[value(alias("bloque-rm"))]
-    BloqueRm,
+    #[value(alias("minor-block"))]
+    MinorBlock,
 }
 
 /// Represents a single chord within a progression
@@ -534,7 +534,7 @@ pub fn build_progression(root: Note, formula: HarmonicFormula) -> Vec<Progressio
         HarmonicFormula::Block => get_block_progression_spec(root),
         HarmonicFormula::Circle => get_circle_progression_spec(root),
         HarmonicFormula::Guajira => get_guajira_progression_spec(root),
-        HarmonicFormula::BloqueRm => get_bloque_rm_progression_spec(root),
+        HarmonicFormula::MinorBlock => get_minor_block_progression_spec(root),
     };
 
     solve_voice_leading(root, chord_specs)
@@ -659,8 +659,8 @@ fn get_guajira_progression_spec(root: Note) -> Vec<(String, Note, ChordType)> {
     ]
 }
 
-/// Returns the chord specifications for the vi-IV7-ii-III7 "Bloque R.m." progression.
-fn get_bloque_rm_progression_spec(root: Note) -> Vec<(String, Note, ChordType)> {
+/// Returns the chord specifications for the vi-IV7-ii-III7 "Relative Minor Block" progression.
+fn get_minor_block_progression_spec(root: Note) -> Vec<(String, Note, ChordType)> {
     vec![
         (
             "vi".to_string(),
@@ -987,8 +987,8 @@ mod tests {
     }
 
     #[test]
-    fn test_lib_build_bloque_rm_progression_c() {
-        let progression = build_progression(Note::C, HarmonicFormula::BloqueRm);
+    fn test_lib_build_minor_block_progression_c() {
+        let progression = build_progression(Note::C, HarmonicFormula::MinorBlock);
 
         // vi, IV7, ii, III7
         // C Major -> A, F, D, E
