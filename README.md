@@ -155,7 +155,7 @@ tonic-music progression --root C --formula circle
 I:      C       -> [C, E, G]
 vi:     A m     -> [C, E, A]
 ii:     D m     -> [D, F, A]
-V7:     G 7     -> [B, D, F, G]
+V7:     G 7     -> [D, F, G, B]
 ```
 
 **Command:**
@@ -196,10 +196,10 @@ tonic-music progression --root C --formula bloque-rm
 
 ```text
 --- C bloque-rm Progression ---
-vi:     A m     -> [A, C, E]
-IV7:    F 7     -> [A, C, D#, F]
-ii:     D m     -> [A, D, F]
-III7:   E 7     -> [G#, B, D, E]
+vi:     A m     -> [C, E, A]
+IV7:    F 7     -> [C, D#, F, A]
+ii:     D m     -> [D, F, A]
+III7:   E 7     -> [D, E, G#, B]
 ```
 
 ## 🤝 Contributing

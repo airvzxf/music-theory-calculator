@@ -536,20 +536,12 @@ pub fn build_progression(root: Note, formula: HarmonicFormula) -> Vec<Progressio
     };
 
     let mut progression = Vec::new();
+    let mut previous_bass_note = root;
 
-    // 2. Handle the first chord separately
-    let (degree, chord_root, chord_type) = &chord_specs[0];
-    let first_chord_notes = build_chord(*chord_root, *chord_type);
-    let mut previous_bass_note = *first_chord_notes.first().unwrap();
-    progression.push(ProgressionChord {
-        degree: degree.clone(),
-        root_note: *chord_root,
-        chord_type: *chord_type,
-        notes: first_chord_notes,
-    });
-
-    // 3. Loop through the rest of the chords and apply voice leading
-    for (degree, chord_root, chord_type) in chord_specs.iter().skip(1) {
+    // 2. Loop through ALL chords and apply voice leading
+    // Note: We include the first chord in this logic so it can start in an inversion
+    // if that's closer to the "previous bass" (which starts as the Key Tonic).
+    for (degree, chord_root, chord_type) in chord_specs.iter() {
         let root_chord = build_chord(*chord_root, *chord_type);
         let inversions = get_inversions(&root_chord);
 
@@ -565,8 +557,9 @@ pub fn build_progression(root: Note, formula: HarmonicFormula) -> Vec<Progressio
                 let dist_a_prev = semitone_distance(*bass_a, previous_bass_note);
                 let dist_b_prev = semitone_distance(*bass_b, previous_bass_note);
 
-                // Compare by distance to tonic, then by distance to previous bass note
-                (dist_a_root, dist_a_prev).cmp(&(dist_b_root, dist_b_prev))
+                // PRIORITIZE SMOOTHNESS (dist to previous bass) over CENTERING (dist to tonic)
+                // This creates better voice leading lines (e.g., walking bass).
+                (dist_a_prev, dist_a_root).cmp(&(dist_b_prev, dist_b_root))
             })
             .unwrap_or(root_chord); // Fallback
 
@@ -899,14 +892,21 @@ mod tests {
         );
 
         // Test F#7 (I7) - Should be root position [F#, A#, C#, E]
-        // Bass F# is closest to tonic F# (dist 0)
+        // Previous Bass: F (from V7). Dist to F# is 1. Dist to E is 1.
+        // Tie breaker: Centering. F# is Tonic (dist 0). E is dist 2.
+        // Winner: Bass F# (Root).
         assert_eq!(
             progression[2].notes,
             vec![Note::FSharp, Note::ASharp, Note::CSharp, Note::E]
         );
 
-        // Test C#7 (V7) - Should be 1st inversion [F, G#, B, C#]
-        // Bass F is closest to tonic F# (dist 1)
+        // Test C#7 (V7)
+        // Previous Bass: F# (I).
+        // Inv Root (C#): Dist F#->C# = 7 or 5? semitone_distance(F#, C#) = 5.
+        // Inv 1 (F): Dist F#->F = 1.
+        // Inv 2 (G#): Dist F#->G# = 2.
+        // Inv 3 (B): Dist F#->B = 5.
+        // Winner: Inv 1 (Bass F / E#). Dist 1.
         assert_eq!(
             progression[1].notes,
             vec![Note::F, Note::GSharp, Note::B, Note::CSharp]
@@ -933,11 +933,15 @@ mod tests {
             ]
         );
 
-        // Check the notes of the V7 (G7) - Should be 1st inversion [B, D, F, G]
-        // Bass B is closest to tonic C (dist 1)
+        // Check the notes of the V7 (G7)
+        // Prev Bass: D (from Dm).
+        // Inv Root (G): Dist D->G = 5.
+        // Inv 1 (B): Dist D->B = 3.
+        // Inv 2 (D): Dist D->D = 0.
+        // Winner: Inv 2 (Bass D). [D, F, G, B]
         assert_eq!(
             progression[3].notes,
-            vec![Note::B, Note::D, Note::F, Note::G]
+            vec![Note::D, Note::F, Note::G, Note::B]
         );
     }
 
