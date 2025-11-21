@@ -291,7 +291,13 @@
                 <option value="block">Block (I-V7-I7-IV)</option>
                 <option value="guajira">Guajira (I-IV-V7)</option>
                 <option value="bloque-rm">Bloque R.m. (vi-IV7-ii-III7)</option>
+                <option value="custom">Custom...</option>
             </select>
+        </div>
+        <div class="form-group hidden" id="custom-formula-group" style="grid-column: 1 / -1;">
+            <label for="custom-formula">Custom Progression (Roman Numerals)</label>
+            <input id="custom-formula" placeholder="e.g. I-IV-iv-I or Imaj7 bIII IV7 V7" type="text">
+            <small style="color: #6c757d; display: block; margin-top: 0.25rem;">Use hyphens or spaces. Case sensitive (I=Major, i=Minor).</small>
         </div>
     </div>
 
@@ -303,7 +309,14 @@
 </div>
 
 <script type="module">
-    import init, {get_scale, get_chord, get_harmonization, get_progression, get_version} from './pkg/tonic_music_wasm.js';
+    import init, {
+        get_chord,
+        get_custom_progression,
+        get_harmonization,
+        get_progression,
+        get_scale,
+        get_version
+    } from './pkg/tonic_music_wasm.js';
 
     // ... (JS code remains the same) ...
     // Helper to format notes array [C, E, G] -> HTML
@@ -385,6 +398,7 @@
         }
 
         const commandSelect = document.getElementById('command');
+        const formulaSelect = document.getElementById('formula');
         const btn = document.getElementById('calculate');
         const resultDiv = document.getElementById('result');
         const resultCard = document.getElementById('result-card');
@@ -422,9 +436,16 @@
                 }
             } else if (val === 'progression') {
                 document.getElementById('progression-options').classList.remove('hidden');
+                // Check if custom formula is selected
+                if (formulaSelect.value === 'custom') {
+                    document.getElementById('custom-formula-group').classList.remove('hidden');
+                } else {
+                    document.getElementById('custom-formula-group').classList.add('hidden');
+                }
             }
         };
         commandSelect.addEventListener('change', updateUI);
+        formulaSelect.addEventListener('change', updateUI);
         updateUI();
 
         btn.addEventListener('click', () => {
@@ -452,8 +473,19 @@
                     html = renderTableResult(data, `${root} ${type} Harmonization`, 'harmonize');
                 } else if (cmd === 'progression') {
                     const formula = document.getElementById('formula').value;
-                    const data = get_progression(root, formula);
-                    html = renderTableResult(data, `${root} ${formula} Progression`, 'progression');
+                    let data;
+                    let title;
+
+                    if (formula === 'custom') {
+                        const customFormula = document.getElementById('custom-formula').value;
+                        if (!customFormula.trim()) throw "Please enter a custom formula.";
+                        data = get_custom_progression(root, customFormula);
+                        title = `${root} Custom Progression`;
+                    } else {
+                        data = get_progression(root, formula);
+                        title = `${root} ${formula} Progression`;
+                    }
+                    html = renderTableResult(data, title, 'progression');
                 }
 
                 resultDiv.innerHTML = html;

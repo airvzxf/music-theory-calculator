@@ -1,8 +1,9 @@
 use clap::ValueEnum;
 use serde_wasm_bindgen::to_value;
 use tonic_music_core::{
-    ChordType, HarmonicFormula, ScaleType, build_chord, build_progression, build_scale,
-    get_inversions, harmonize_scale, parser::parse_note,
+    ChordType, HarmonicFormula, ScaleType, build_chord, build_custom_progression,
+    build_progression, build_scale, get_inversions, harmonize_scale, parser::parse_note,
+    parser::parse_roman_chord,
 };
 use wasm_bindgen::prelude::*;
 
@@ -56,6 +57,24 @@ pub fn get_progression(root: &str, formula: &str) -> Result<JsValue, JsValue> {
         .map_err(|e| JsValue::from_str(&format!("Invalid formula: {}", e)))?;
 
     let progression = build_progression(root_note, formula_enum);
+
+    Ok(to_value(&progression)?)
+}
+
+#[wasm_bindgen]
+pub fn get_custom_progression(root: &str, custom_formula: &str) -> Result<JsValue, JsValue> {
+    let root_note = parse_note(root).map_err(|e| JsValue::from_str(&e))?;
+
+    let parts: Vec<&str> = custom_formula
+        .split(&['-', ' '][..])
+        .filter(|s| !s.is_empty())
+        .collect();
+    let specs_res: Result<Vec<_>, _> = parts.into_iter().map(parse_roman_chord).collect();
+
+    let specs =
+        specs_res.map_err(|e| JsValue::from_str(&format!("Invalid custom formula: {}", e)))?;
+
+    let progression = build_custom_progression(root_note, specs);
 
     Ok(to_value(&progression)?)
 }

@@ -103,7 +103,11 @@ pub enum Commands {
         root: String,
 
         /// The name of the formula (e.g., block, circle)
-        #[arg(short, long, value_enum)]
-        formula: HarmonicFormula,
+        #[arg(short, long, value_enum, required_unless_present = "custom")]
+        formula: Option<HarmonicFormula>,
+
+        /// A custom formula string (e.g. "I-IV-V7")
+        #[arg(long, required_unless_present = "formula")]
+        custom: Option<String>,
     },
 }

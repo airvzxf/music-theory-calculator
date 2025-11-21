@@ -525,6 +525,8 @@ pub fn harmonize_scale(scale: &[Note], build_sevenths: bool) -> Vec<HarmonizedDe
     harmonized_scale
 }
 
+use parser::ParsedRomanChord;
+
 /// Builds a chord progression from a root note and a formula.
 pub fn build_progression(root: Note, formula: HarmonicFormula) -> Vec<ProgressionChord> {
     // 1. Get the sequence of (degree, root, type) from the formula-specific function
@@ -535,8 +537,32 @@ pub fn build_progression(root: Note, formula: HarmonicFormula) -> Vec<Progressio
         HarmonicFormula::BloqueRm => get_bloque_rm_progression_spec(root),
     };
 
+    solve_voice_leading(root, chord_specs)
+}
+
+/// Builds a custom chord progression from a root note and a list of parsed chord specs.
+pub fn build_custom_progression(root: Note, specs: Vec<ParsedRomanChord>) -> Vec<ProgressionChord> {
+    let chord_specs = specs
+        .into_iter()
+        .map(|spec| {
+            (
+                spec.degree,
+                transpose(root, spec.interval_from_root),
+                spec.chord_type,
+            )
+        })
+        .collect();
+
+    solve_voice_leading(root, chord_specs)
+}
+
+/// Helper to apply voice leading logic to a sequence of chords.
+fn solve_voice_leading(
+    key_center: Note,
+    chord_specs: Vec<(String, Note, ChordType)>,
+) -> Vec<ProgressionChord> {
     let mut progression = Vec::new();
-    let mut previous_bass_note = root;
+    let mut previous_bass_note = key_center;
 
     // 2. Loop through ALL chords and apply voice leading
     // Note: We include the first chord in this logic so it can start in an inversion
@@ -551,8 +577,8 @@ pub fn build_progression(root: Note, formula: HarmonicFormula) -> Vec<Progressio
                 let bass_a = inv_a.first().unwrap();
                 let bass_b = inv_b.first().unwrap();
 
-                let dist_a_root = semitone_distance(*bass_a, root);
-                let dist_b_root = semitone_distance(*bass_b, root);
+                let dist_a_root = semitone_distance(*bass_a, key_center);
+                let dist_b_root = semitone_distance(*bass_b, key_center);
 
                 let dist_a_prev = semitone_distance(*bass_a, previous_bass_note);
                 let dist_b_prev = semitone_distance(*bass_b, previous_bass_note);

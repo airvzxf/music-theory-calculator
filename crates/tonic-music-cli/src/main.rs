@@ -29,8 +29,9 @@ use clap::Parser;
 use serde::Serialize;
 // Import our library's functions and structs
 use tonic_music_core::{
-    ChordType, HarmonizedDegree, Note, ProgressionChord, build_chord, build_progression,
-    build_scale, get_inversions, harmonize_scale, parser::parse_note,
+    ChordType, HarmonizedDegree, Note, ProgressionChord, build_chord, build_custom_progression,
+    build_progression, build_scale, get_inversions, harmonize_scale, parser::parse_note,
+    parser::parse_roman_chord,
 };
 
 // Declare the CLI module
@@ -281,16 +282,38 @@ fn main() {
             };
             print_output(&response, cli_args.format);
         }
-        Commands::Progression { root, formula } => {
+        Commands::Progression {
+            root,
+            formula,
+            custom,
+        } => {
             let root_note = parse_note(root).unwrap_or_else(|e| {
                 eprintln!("Error: {}", e);
                 std::process::exit(1);
             });
-            let progression = build_progression(root_note, *formula);
+
+            let (progression, formula_name) = if let Some(f) = formula {
+                (build_progression(root_note, *f), format!("{:?}", f))
+            } else if let Some(c) = custom {
+                // Split by '-' or space
+                let parts: Vec<&str> = c.split(&['-', ' '][..]).filter(|s| !s.is_empty()).collect();
+
+                let specs_res: Result<Vec<_>, _> =
+                    parts.into_iter().map(parse_roman_chord).collect();
+
+                let specs = specs_res.unwrap_or_else(|e| {
+                    eprintln!("Error parsing custom progression: {}", e);
+                    std::process::exit(1);
+                });
+
+                (build_custom_progression(root_note, specs), c.clone())
+            } else {
+                unreachable!("Clap ensures one is present");
+            };
 
             let response = ProgressionResponse {
                 root: root.clone(),
-                formula: format!("{:?}", formula),
+                formula: formula_name,
                 progression,
             };
             print_output(&response, cli_args.format);

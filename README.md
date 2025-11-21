@@ -143,7 +143,7 @@ VII (B):     B m7b5  -> [B, D, F, A]
 
 Generates a harmonic progression (chord formula). Now features **voice leading**, automatically selecting inversions to create smoother transitions between chords.
 
-**Command:**
+**Command (Predefined Formula):**
 ```bash
 tonic-music progression --root C --formula circle
 ```
@@ -156,6 +156,23 @@ I:      C       -> [C, E, G]
 vi:     A m     -> [C, E, A]
 ii:     D m     -> [D, F, A]
 V7:     G 7     -> [D, F, G, B]
+```
+
+**Command (Custom Formula):**
+
+You can define your own progression using Roman Numerals (e.g., `I`, `IV`, `V7`, `ii7`).
+
+```bash
+tonic-music progression --root C --custom "I-IV-iv-I"
+```
+
+**Output:**
+```text
+--- C "I-IV-iv-I" Progression ---
+I:      C       -> [C, E, G]
+IV:     F       -> [C, F, A]
+iv:     F m     -> [C, F, G#]
+I:      C       -> [C, E, G]
 ```
 
 **Command:**

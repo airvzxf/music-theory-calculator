@@ -93,6 +93,7 @@ To run the WebAssembly interface locally:
     ```bash
     tonic-music progression -r A -f block
     tonic-music progression -r A -f circle
+    tonic-music progression -r C --custom "I-IV-iv-I"
     ```
 
 ## Development Conventions
