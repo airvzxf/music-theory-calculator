@@ -30,6 +30,8 @@ Ensure you have Rust and Cargo installed.
 
 This project includes a WebAssembly (Wasm) version that runs directly in your browser.
 
+**👉 [Try the Live Demo](https://airvzxf.github.io/music-theory-calculator/)**
+
 ### Running Locally
 To build and serve the web interface locally:
 
