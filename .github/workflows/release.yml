@@ -146,11 +146,46 @@ jobs:
           name: release-assets-${{ runner.os }}
           path: ${{ env.ASSET_PATH }}
 
+  build-wasm-release:
+    name: build-wasm-release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+
+      - name: Install wasm-pack
+        run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+
+      - name: Build Wasm
+        working-directory: crates/tonic-music-wasm
+        run: wasm-pack build --target web
+
+      - name: Package Web Artifacts
+        shell: bash
+        run: |
+          mkdir -p tonic-music-web
+          cp crates/tonic-music-wasm/index.html tonic-music-web/
+          cp -r crates/tonic-music-wasm/pkg tonic-music-web/
+
+          tar -czf tonic-music-web.tar.gz tonic-music-web
+          echo "ASSET_PATH=tonic-music-web.tar.gz" >> $GITHUB_ENV
+
+      - name: Upload web assets artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: web-assets
+          path: ${{ env.ASSET_PATH }}
+
   create-tag-and-release:
     permissions:
       contents: write
     name: create-tag-and-release
-    needs: [create-release-body, build-release]
+    needs: [create-release-body, build-release, build-wasm-release]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -170,5 +205,6 @@ jobs:
             artifacts/release-assets-Linux/tonic-music-Linux.tar.gz
             artifacts/release-assets-macOS/tonic-music-macOS.tar.gz
             artifacts/release-assets-Windows/tonic-music-Windows.exe
+            artifacts/web-assets/tonic-music-web.tar.gz
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
