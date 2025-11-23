@@ -4,7 +4,6 @@ on:
   push:
     tags:
       - 'v[0-9]+.[0-9]+.[0-9]+'
-  workflow_dispatch:
 
 jobs:
   create-release-body:
@@ -251,14 +250,25 @@ jobs:
       - name: Prepare Android Artifacts
         run: |
           mkdir -p android-dist
-          cp apps/android/app/build/outputs/apk/release/app-release.apk android-dist/
-          cp apps/android/app/build/outputs/bundle/release/app-release.aab android-dist/
+
+          # Rename and move artifacts
+          cp apps/android/app/build/outputs/apk/release/app-release.apk android-dist/tonic-music-Android.apk
+          cp apps/android/app/build/outputs/bundle/release/app-release.aab android-dist/tonic-music-Android.aab
+          cp apps/android/app/build/outputs/native-debug-symbols/native-debug-symbols.zip android-dist/native-debug-symbols.zip
+
+          # Create single tarball containing all 3 files
+          cd android-dist
+          tar -czf tonic-music-Android.tar.gz tonic-music-Android.apk tonic-music-Android.aab native-debug-symbols.zip
+
+          # Cleanup intermediate files so we only upload the tarball
+          rm tonic-music-Android.apk tonic-music-Android.aab native-debug-symbols.zip
+          cd ..
 
       - name: Upload Android Release Assets
         uses: actions/upload-artifact@v4
         with:
           name: android-release-assets
-          path: android-dist/*
+          path: android-dist/tonic-music-Android.tar.gz
 
   create-tag-and-release:
     permissions:
@@ -285,7 +295,6 @@ jobs:
             artifacts/release-assets-macOS/tonic-music-macOS.tar.gz
             artifacts/release-assets-Windows/tonic-music-Windows.exe
             artifacts/web-assets/tonic-music-web.tar.gz
-            artifacts/android-release-assets/*.apk
-            artifacts/android-release-assets/*.aab
+            artifacts/android-release-assets/tonic-music-Android.tar.gz
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
