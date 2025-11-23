@@ -190,3 +190,6 @@ jobs:
     - name: Build Android APK
       working-directory: apps/android
       run: ./gradlew assembleDebug
+    - name: Build Android App Bundle (AAB)
+      working-directory: apps/android
+      run: ./gradlew bundleRelease
