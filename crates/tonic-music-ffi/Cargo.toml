@@ -10,7 +10,7 @@ name = "tonic_music_ffi"
 [dependencies]
 thiserror = "2.0.17"
 tonic-music-core = { path = "../tonic-music-core" }
-uniffi = { version = "0.28", features = ["cli"] }
+uniffi = { version = "0.30.0", features = ["cli"] }
 
 [build-dependencies]
-uniffi = { version = "0.28", features = ["build"] }
+uniffi = { version = "0.30.0", features = ["build"] }
