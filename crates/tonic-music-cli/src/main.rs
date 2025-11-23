@@ -81,9 +81,11 @@ impl std::fmt::Display for ChordResponse {
         writeln!(f, "--- {} {} Chord ---", self.root, self.chord_type)?;
 
         if let Some(inversions) = &self.inversions {
-            let titles = ["Root:", "1st Inv:", "2nd Inv:", "3rd Inv:", "4th Inv:"];
+            let titles: [&str; 5] = ["Root:", "1st Inv:", "2nd Inv:", "3rd Inv:", "4th Inv:"];
             for (i, inv) in inversions.iter().enumerate() {
-                let title = titles.get(i).cloned().unwrap_or("Inv:");
+                let i: usize = i;
+                let inv: &Vec<Note> = inv;
+                let title: &str = titles.get(i).cloned().unwrap_or("Inv:");
                 writeln!(f, "{} \t{:?}", title, inv)?;
             }
             Ok(())
@@ -95,12 +97,14 @@ impl std::fmt::Display for ChordResponse {
 
 impl Markdown for ChordResponse {
     fn to_markdown(&self) -> String {
-        let mut md = format!("# {} {} Chord\n\n", self.root, self.chord_type);
+        let mut md: String = format!("# {} {} Chord\n\n", self.root, self.chord_type);
         if let Some(inversions) = &self.inversions {
             md.push_str("## Inversions\n");
-            let titles = ["Root", "1st Inv", "2nd Inv", "3rd Inv", "4th Inv"];
+            let titles: [&str; 5] = ["Root", "1st Inv", "2nd Inv", "3rd Inv", "4th Inv"];
             for (i, inv) in inversions.iter().enumerate() {
-                let title = titles.get(i).cloned().unwrap_or("Inv");
+                let i: usize = i;
+                let inv: &Vec<Note> = inv;
+                let title: &str = titles.get(i).cloned().unwrap_or("Inv");
                 md.push_str(&format!("- **{}:** {:?}\n", title, inv));
             }
         } else {
@@ -121,11 +125,12 @@ impl std::fmt::Display for HarmonizeResponse {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         writeln!(f, "--- {} {} Harmonization ---", self.root, self.scale_type)?;
 
-        let roman_numerals = ["I", "II", "III", "IV", "V", "VI", "VII"];
+        let roman_numerals: [&str; 7] = ["I", "II", "III", "IV", "V", "VI", "VII"];
 
         for degree in &self.harmony {
-            let degree_name = roman_numerals.get(degree.degree - 1).unwrap_or(&"?");
-            let quality = get_chord_quality_symbol(degree.chord_type);
+            let degree: &HarmonizedDegree = degree;
+            let degree_name: &str = roman_numerals.get(degree.degree - 1).unwrap_or(&"?");
+            let quality: &str = get_chord_quality_symbol(degree.chord_type);
 
             writeln!(
                 f,
@@ -139,14 +144,15 @@ impl std::fmt::Display for HarmonizeResponse {
 
 impl Markdown for HarmonizeResponse {
     fn to_markdown(&self) -> String {
-        let mut md = format!(
+        let mut md: String = format!(
             "# {} {} Harmonization\n\n| Degree | Note | Chord | Notes |\n|---|---|---|---|\n",
             self.root, self.scale_type
         );
-        let roman_numerals = ["I", "II", "III", "IV", "V", "VI", "VII"];
+        let roman_numerals: [&str; 7] = ["I", "II", "III", "IV", "V", "VI", "VII"];
         for degree in &self.harmony {
-            let degree_name = roman_numerals.get(degree.degree - 1).unwrap_or(&"?");
-            let quality = get_chord_quality_symbol(degree.chord_type);
+            let degree: &HarmonizedDegree = degree;
+            let degree_name: &str = roman_numerals.get(degree.degree - 1).unwrap_or(&"?");
+            let quality: &str = get_chord_quality_symbol(degree.chord_type);
             md.push_str(&format!(
                 "| {} | {:?} | {:?}{} | {:?} |\n",
                 degree_name, degree.root_note, degree.root_note, quality, degree.notes
@@ -167,7 +173,8 @@ impl std::fmt::Display for ProgressionResponse {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         writeln!(f, "--- {} {} Progression ---", self.root, self.formula)?;
         for chord in &self.progression {
-            let quality = get_chord_quality_symbol(chord.chord_type);
+            let chord: &ProgressionChord = chord;
+            let quality: &str = get_chord_quality_symbol(chord.chord_type);
             writeln!(
                 f,
                 "{}:\t{:?} {} \t-> {:?}",
@@ -180,12 +187,13 @@ impl std::fmt::Display for ProgressionResponse {
 
 impl Markdown for ProgressionResponse {
     fn to_markdown(&self) -> String {
-        let mut md = format!(
+        let mut md: String = format!(
             "# {} {} Progression\n\n| Degree | Chord | Notes |\n|---|---|---|\n",
             self.root, self.formula
         );
         for chord in &self.progression {
-            let quality = get_chord_quality_symbol(chord.chord_type);
+            let chord: &ProgressionChord = chord;
+            let quality: &str = get_chord_quality_symbol(chord.chord_type);
             md.push_str(&format!(
                 "| {} | {:?}{} | {:?} |\n",
                 chord.degree, chord.root_note, quality, chord.notes
@@ -220,18 +228,18 @@ fn print_output<T: Serialize + std::fmt::Display + Markdown>(data: &T, format: O
 }
 
 fn main() {
-    let cli_args = Cli::parse();
+    let cli_args: Cli = Cli::parse();
 
     match &cli_args.command {
         Commands::Scale { root, scale_type } => {
-            let root_note = parse_note(root).unwrap_or_else(|e| {
+            let root_note: Note = parse_note(root).unwrap_or_else(|e| {
                 eprintln!("Error: {}", e);
                 std::process::exit(1);
             });
             // scale_type is already typed
-            let notes = build_scale(root_note, *scale_type);
+            let notes: Vec<Note> = build_scale(root_note, *scale_type);
 
-            let response = ScaleResponse {
+            let response: ScaleResponse = ScaleResponse {
                 root: root.clone(),
                 scale_type: format!("{:?}", scale_type),
                 notes,
@@ -243,19 +251,19 @@ fn main() {
             chord_type,
             inversions,
         } => {
-            let root_note = parse_note(root).unwrap_or_else(|e| {
+            let root_note: Note = parse_note(root).unwrap_or_else(|e| {
                 eprintln!("Error: {}", e);
                 std::process::exit(1);
             });
-            let notes = build_chord(root_note, *chord_type);
+            let notes: Vec<Note> = build_chord(root_note, *chord_type);
 
-            let invs = if *inversions {
+            let invs: Option<Vec<Vec<Note>>> = if *inversions {
                 Some(get_inversions(&notes))
             } else {
                 None
             };
 
-            let response = ChordResponse {
+            let response: ChordResponse = ChordResponse {
                 root: root.clone(),
                 chord_type: format!("{:?}", chord_type),
                 notes,
@@ -268,14 +276,14 @@ fn main() {
             scale_type,
             sevenths,
         } => {
-            let root_note = parse_note(root).unwrap_or_else(|e| {
+            let root_note: Note = parse_note(root).unwrap_or_else(|e| {
                 eprintln!("Error: {}", e);
                 std::process::exit(1);
             });
-            let scale_notes = build_scale(root_note, *scale_type);
-            let harmony = harmonize_scale(&scale_notes, *sevenths);
+            let scale_notes: Vec<Note> = build_scale(root_note, *scale_type);
+            let harmony: Vec<HarmonizedDegree> = harmonize_scale(&scale_notes, *sevenths);
 
-            let response = HarmonizeResponse {
+            let response: HarmonizeResponse = HarmonizeResponse {
                 root: root.clone(),
                 scale_type: format!("{:?}", scale_type),
                 harmony,
@@ -287,31 +295,39 @@ fn main() {
             formula,
             custom,
         } => {
-            let root_note = parse_note(root).unwrap_or_else(|e| {
+            let root_note: Note = parse_note(root).unwrap_or_else(|e| {
                 eprintln!("Error: {}", e);
                 std::process::exit(1);
             });
 
-            let (progression, formula_name) = if let Some(f) = formula {
-                (build_progression(root_note, *f), format!("{:?}", f))
-            } else if let Some(c) = custom {
-                // Split by '-' or space
-                let parts: Vec<&str> = c.split(&['-', ' '][..]).filter(|s| !s.is_empty()).collect();
+            let (progression, formula_name): (Vec<ProgressionChord>, String) =
+                if let Some(f) = formula {
+                    (build_progression(root_note, *f), format!("{:?}", f))
+                } else if let Some(c) = custom {
+                    // Split by '-' or space
+                    let parts: Vec<&str> = c
+                        .split(&['-', ' '][..])
+                        .filter(|s: &&str| !s.is_empty())
+                        .collect();
 
-                let specs_res: Result<Vec<_>, _> =
-                    parts.into_iter().map(parse_roman_chord).collect();
+                    let specs_res: Result<Vec<tonic_music_core::parser::ParsedRomanChord>, String> =
+                        parts
+                            .into_iter()
+                            .map(|s: &str| parse_roman_chord(s))
+                            .collect();
 
-                let specs = specs_res.unwrap_or_else(|e| {
-                    eprintln!("Error parsing custom progression: {}", e);
-                    std::process::exit(1);
-                });
+                    let specs: Vec<tonic_music_core::parser::ParsedRomanChord> = specs_res
+                        .unwrap_or_else(|e| {
+                            eprintln!("Error parsing custom progression: {}", e);
+                            std::process::exit(1);
+                        });
 
-                (build_custom_progression(root_note, specs), c.clone())
-            } else {
-                unreachable!("Clap ensures one is present");
-            };
+                    (build_custom_progression(root_note, specs), c.clone())
+                } else {
+                    unreachable!("Clap ensures one is present");
+                };
 
-            let response = ProgressionResponse {
+            let response: ProgressionResponse = ProgressionResponse {
                 root: root.clone(),
                 formula: formula_name,
                 progression,

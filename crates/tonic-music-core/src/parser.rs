@@ -31,7 +31,8 @@ use clap::ValueEnum;
 
 /// Parses a string into a Note enum. Returns Err if invalid.
 pub fn parse_note(s: &str) -> Result<Note, String> {
-    match s.to_lowercase().as_str() {
+    let s_lower: String = s.to_lowercase();
+    match s_lower.as_str() {
         "c" => Ok(Note::C),
         "c#" | "db" => Ok(Note::CSharp),
         "d" => Ok(Note::D),
@@ -58,8 +59,8 @@ pub struct ParsedRomanChord {
 
 /// Parses a roman numeral string (e.g. "IV", "vii", "bVI7") into a chord specification.
 pub fn parse_roman_chord(input: &str) -> Result<ParsedRomanChord, String> {
-    let mut rest = input;
-    let mut accidental_offset = 0; // 0 = none, -1 = flat, 1 = sharp
+    let mut rest: &str = input;
+    let mut accidental_offset: i8 = 0; // 0 = none, -1 = flat, 1 = sharp
 
     // 1. Accidental
     if rest.starts_with('#') {
@@ -74,11 +75,11 @@ pub fn parse_roman_chord(input: &str) -> Result<ParsedRomanChord, String> {
 
     // 2. Numeral
     // Extract leading I, V chars.
-    let numeral_end = rest
+    let numeral_end: usize = rest
         .find(|c: char| !matches!(c, 'i' | 'I' | 'v' | 'V'))
         .unwrap_or(rest.len());
-    let numeral_str = &rest[..numeral_end];
-    let suffix = &rest[numeral_end..];
+    let numeral_str: &str = &rest[..numeral_end];
+    let suffix: &str = &rest[numeral_end..];
 
     if numeral_str.is_empty() {
         return Err(format!(
@@ -88,7 +89,8 @@ pub fn parse_roman_chord(input: &str) -> Result<ParsedRomanChord, String> {
     }
 
     // 3. Decode Numeral (1-7)
-    let (base_degree, _is_valid_numeral) = match numeral_str.to_uppercase().as_str() {
+    let numeral_str_upper: String = numeral_str.to_uppercase();
+    let (base_degree, _is_valid_numeral): (usize, bool) = match numeral_str_upper.as_str() {
         "I" => (1, true),
         "II" => (2, true),
         "III" => (3, true),
@@ -99,11 +101,11 @@ pub fn parse_roman_chord(input: &str) -> Result<ParsedRomanChord, String> {
         _ => return Err(format!("Invalid roman numeral: {}", numeral_str)),
     };
 
-    let is_uppercase = numeral_str.chars().next().unwrap().is_uppercase();
+    let is_uppercase: bool = numeral_str.chars().next().unwrap().is_uppercase();
 
     // 4. Determine Interval
     // Map degree 1-7 to Major Scale intervals (semitones)
-    let semitones_maj = match base_degree {
+    let semitones_maj: u8 = match base_degree {
         1 => 0,
         2 => 2,
         3 => 4,
@@ -114,11 +116,11 @@ pub fn parse_roman_chord(input: &str) -> Result<ParsedRomanChord, String> {
         _ => unreachable!(),
     };
 
-    let mut semitones_i8 = semitones_maj as i8 + accidental_offset;
+    let mut semitones_i8: i8 = semitones_maj as i8 + accidental_offset;
     // Normalize to 0-11
     semitones_i8 = (semitones_i8 + 12) % 12;
 
-    let interval = match semitones_i8 {
+    let interval: Interval = match semitones_i8 {
         0 => Interval::Unison,
         1 => Interval::MinorSecond,
         2 => Interval::MajorSecond,
@@ -135,13 +137,13 @@ pub fn parse_roman_chord(input: &str) -> Result<ParsedRomanChord, String> {
     };
 
     // 5. Determine Chord Type
-    let basic_triad = if is_uppercase {
+    let basic_triad: ChordType = if is_uppercase {
         ChordType::Major
     } else {
         ChordType::Minor
     };
 
-    let chord_type = if suffix.is_empty() {
+    let chord_type: ChordType = if suffix.is_empty() {
         basic_triad
     } else {
         match suffix {
@@ -210,12 +212,12 @@ mod tests {
     #[test]
     fn test_parse_roman_simple() {
         // I -> Unison, Major
-        let res = parse_roman_chord("I").unwrap();
+        let res: ParsedRomanChord = parse_roman_chord("I").unwrap();
         assert_eq!(res.interval_from_root, Interval::Unison);
         assert_eq!(res.chord_type, ChordType::Major);
 
         // iv -> PerfectFourth, Minor
-        let res = parse_roman_chord("iv").unwrap();
+        let res: ParsedRomanChord = parse_roman_chord("iv").unwrap();
         assert_eq!(res.interval_from_root, Interval::PerfectFourth);
         assert_eq!(res.chord_type, ChordType::Minor);
     }
@@ -223,12 +225,12 @@ mod tests {
     #[test]
     fn test_parse_roman_accidental() {
         // bVII -> MinorSeventh (11-1=10), Major
-        let res = parse_roman_chord("bVII").unwrap();
+        let res: ParsedRomanChord = parse_roman_chord("bVII").unwrap();
         assert_eq!(res.interval_from_root, Interval::MinorSeventh);
         assert_eq!(res.chord_type, ChordType::Major);
 
         // #IV -> Tritone (5+1=6), Major
-        let res = parse_roman_chord("#IV").unwrap();
+        let res: ParsedRomanChord = parse_roman_chord("#IV").unwrap();
         assert_eq!(res.interval_from_root, Interval::Tritone);
         assert_eq!(res.chord_type, ChordType::Major);
     }
@@ -236,19 +238,19 @@ mod tests {
     #[test]
     fn test_parse_roman_suffixes() {
         // V7 -> Dominant7
-        let res = parse_roman_chord("V7").unwrap();
+        let res: ParsedRomanChord = parse_roman_chord("V7").unwrap();
         assert_eq!(res.chord_type, ChordType::Dominant7);
 
         // ii7 -> Minor7
-        let res = parse_roman_chord("ii7").unwrap();
+        let res: ParsedRomanChord = parse_roman_chord("ii7").unwrap();
         assert_eq!(res.chord_type, ChordType::Minor7);
 
         // Imaj7
-        let res = parse_roman_chord("Imaj7").unwrap();
+        let res: ParsedRomanChord = parse_roman_chord("Imaj7").unwrap();
         assert_eq!(res.chord_type, ChordType::Major7);
 
         // viidim
-        let res = parse_roman_chord("viidim").unwrap();
+        let res: ParsedRomanChord = parse_roman_chord("viidim").unwrap();
         assert_eq!(res.chord_type, ChordType::Diminished);
     }
 }

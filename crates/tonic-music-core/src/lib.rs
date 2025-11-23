@@ -62,7 +62,7 @@ impl std::fmt::Debug for Note {
 
 impl std::fmt::Display for Note {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let s = match self {
+        let s: &str = match self {
             Note::C => "C",
             Note::CSharp => "C#",
             Note::D => "D",
@@ -175,13 +175,13 @@ impl Interval {
 /// ```
 pub fn transpose(root: Note, interval: Interval) -> Note {
     // Get the numeric value of the note and interval
-    let root_val = root.as_u8();
-    let interval_val = interval.as_u8();
+    let root_val: u8 = root.as_u8();
+    let interval_val: u8 = interval.as_u8();
 
     // Add them together.
     // We use the modulo (%) operator to wrap around the 12 notes.
     // (e.g., A (9) + MajThird (4) = 13.  13 % 12 = 1 (CSharp))
-    let new_val = (root_val + interval_val) % 12;
+    let new_val: u8 = (root_val + interval_val) % 12;
 
     // Convert the number back to a Note
     Note::from_u8(new_val)
@@ -258,14 +258,14 @@ impl ScaleType {
 /// Builds a `Vec<Note>` for a scale given a root note and scale type.
 pub fn build_scale(root: Note, scale_type: ScaleType) -> Vec<Note> {
     // 1. Get the interval formula for the scale
-    let intervals = scale_type.intervals();
+    let intervals: &[Interval] = scale_type.intervals();
 
     // 2. Iterate over the intervals
     // 3. For each interval, transpose the root note
     // 4. Collect the resulting notes into a Vec
     intervals
         .iter()
-        .map(|&interval| transpose(root, interval))
+        .map(|&interval: &Interval| transpose(root, interval))
         .collect()
 }
 
@@ -397,12 +397,12 @@ impl ChordType {
 /// Builds a `Vec<Note>` for a chord given a root note and chord type.
 pub fn build_chord(root: Note, chord_type: ChordType) -> Vec<Note> {
     // 1. Get the interval formula for the chord
-    let intervals = chord_type.intervals();
+    let intervals: &[Interval] = chord_type.intervals();
 
     // 2. Iterate, transpose, and collect
     intervals
         .iter()
-        .map(|&interval| transpose(root, interval))
+        .map(|&interval: &Interval| transpose(root, interval))
         .collect()
 }
 
@@ -411,11 +411,11 @@ pub fn build_chord(root: Note, chord_type: ChordType) -> Vec<Note> {
 pub fn get_inversions(chord_notes: &[Note]) -> Vec<Vec<Note>> {
     // If there are no notes, it returns an empty list.
     if chord_notes.is_empty() {
-        return Vec::new();
+        return Vec::<Vec<Note>>::new();
     }
 
-    let mut inversions = Vec::new();
-    let mut current_inversion = chord_notes.to_vec();
+    let mut inversions: Vec<Vec<Note>> = Vec::<Vec<Note>>::new();
+    let mut current_inversion: Vec<Note> = chord_notes.to_vec();
 
     // Iterate once for each note in the chord
     for _ in 0..current_inversion.len() {
@@ -432,9 +432,9 @@ pub fn get_inversions(chord_notes: &[Note]) -> Vec<Vec<Note>> {
 
 /// Calculates the shortest distance in semitones between two notes.
 fn semitone_distance(note1: Note, note2: Note) -> u8 {
-    let val1 = note1.as_u8();
-    let val2 = note2.as_u8();
-    let diff = (val1 as i8 - val2 as i8).unsigned_abs();
+    let val1: u8 = note1.as_u8();
+    let val2: u8 = note2.as_u8();
+    let diff: u8 = (val1 as i8 - val2 as i8).unsigned_abs();
     diff.min(12 - diff)
 }
 
@@ -479,35 +479,36 @@ pub struct HarmonizedDegree {
 /// The scale must contain 7 notes.
 pub fn harmonize_scale(scale: &[Note], build_sevenths: bool) -> Vec<HarmonizedDegree> {
     if scale.len() != 7 {
-        return Vec::new();
+        return Vec::<HarmonizedDegree>::new();
     }
 
-    let mut harmonized_scale = Vec::new();
+    let mut harmonized_scale: Vec<HarmonizedDegree> = Vec::<HarmonizedDegree>::new();
 
     for i in 0..7 {
+        let i: usize = i;
         // 1. Get the notes for this degree
-        let root = scale[i];
-        let third = scale[(i + 2) % 7];
-        let fifth = scale[(i + 4) % 7];
+        let root: Note = scale[i];
+        let third: Note = scale[(i + 2) % 7];
+        let fifth: Note = scale[(i + 4) % 7];
 
         // 2. Calculate the intervals
-        let root_val = root.as_u8();
-        let third_interval = (third.as_u8() + 12 - root_val) % 12;
-        let fifth_interval = (fifth.as_u8() + 12 - root_val) % 12;
+        let root_val: u8 = root.as_u8();
+        let third_interval: u8 = (third.as_u8() + 12 - root_val) % 12;
+        let fifth_interval: u8 = (fifth.as_u8() + 12 - root_val) % 12;
 
-        let mut notes = vec![root, third, fifth];
+        let mut notes: Vec<Note> = vec![root, third, fifth];
         let mut seventh_interval: Option<u8> = None;
 
         // If the user wants 7 more, calculate the 7th
         if build_sevenths {
-            let seventh = scale[(i + 6) % 7];
-            let seventh_val = seventh.as_u8();
+            let seventh: Note = scale[(i + 6) % 7];
+            let seventh_val: u8 = seventh.as_u8();
             seventh_interval = Some((seventh_val + 12 - root_val) % 12);
             notes.push(seventh);
         }
 
         // 3. Determine the chord type from these intervals
-        let chord_type = ChordType::from_intervals(
+        let chord_type: ChordType = ChordType::from_intervals(
             third_interval,
             fifth_interval,
             seventh_interval, // Pass Some(val) or None
@@ -530,7 +531,7 @@ use parser::ParsedRomanChord;
 /// Builds a chord progression from a root note and a formula.
 pub fn build_progression(root: Note, formula: HarmonicFormula) -> Vec<ProgressionChord> {
     // 1. Get the sequence of (degree, root, type) from the formula-specific function
-    let chord_specs = match formula {
+    let chord_specs: Vec<(String, Note, ChordType)> = match formula {
         HarmonicFormula::Block => get_block_progression_spec(root),
         HarmonicFormula::Circle => get_circle_progression_spec(root),
         HarmonicFormula::Guajira => get_guajira_progression_spec(root),
@@ -542,9 +543,9 @@ pub fn build_progression(root: Note, formula: HarmonicFormula) -> Vec<Progressio
 
 /// Builds a custom chord progression from a root note and a list of parsed chord specs.
 pub fn build_custom_progression(root: Note, specs: Vec<ParsedRomanChord>) -> Vec<ProgressionChord> {
-    let chord_specs = specs
+    let chord_specs: Vec<(String, Note, ChordType)> = specs
         .into_iter()
-        .map(|spec| {
+        .map(|spec: ParsedRomanChord| {
             (
                 spec.degree,
                 transpose(root, spec.interval_from_root),
@@ -561,27 +562,31 @@ fn solve_voice_leading(
     key_center: Note,
     chord_specs: Vec<(String, Note, ChordType)>,
 ) -> Vec<ProgressionChord> {
-    let mut progression = Vec::new();
-    let mut previous_bass_note = key_center;
+    let mut progression: Vec<ProgressionChord> = Vec::<ProgressionChord>::new();
+    let mut previous_bass_note: Note = key_center;
 
     // 2. Loop through ALL chords and apply voice leading
     // Note: We include the first chord in this logic so it can start in an inversion
     // if that's closer to the "previous bass" (which starts as the Key Tonic).
     for (degree, chord_root, chord_type) in chord_specs.iter() {
-        let root_chord = build_chord(*chord_root, *chord_type);
-        let inversions = get_inversions(&root_chord);
+        let degree: &String = degree;
+        let chord_root: &Note = chord_root;
+        let chord_type: &ChordType = chord_type;
 
-        let best_inversion = inversions
+        let root_chord: Vec<Note> = build_chord(*chord_root, *chord_type);
+        let inversions: Vec<Vec<Note>> = get_inversions(&root_chord);
+
+        let best_inversion: Vec<Note> = inversions
             .into_iter()
-            .min_by(|inv_a, inv_b| {
-                let bass_a = inv_a.first().unwrap();
-                let bass_b = inv_b.first().unwrap();
+            .min_by(|inv_a: &Vec<Note>, inv_b: &Vec<Note>| {
+                let bass_a: &Note = inv_a.first().unwrap();
+                let bass_b: &Note = inv_b.first().unwrap();
 
-                let dist_a_root = semitone_distance(*bass_a, key_center);
-                let dist_b_root = semitone_distance(*bass_b, key_center);
+                let dist_a_root: u8 = semitone_distance(*bass_a, key_center);
+                let dist_b_root: u8 = semitone_distance(*bass_b, key_center);
 
-                let dist_a_prev = semitone_distance(*bass_a, previous_bass_note);
-                let dist_b_prev = semitone_distance(*bass_b, previous_bass_note);
+                let dist_a_prev: u8 = semitone_distance(*bass_a, previous_bass_note);
+                let dist_b_prev: u8 = semitone_distance(*bass_b, previous_bass_note);
 
                 // PRIORITIZE SMOOTHNESS (dist to previous bass) over CENTERING (dist to tonic)
                 // This creates better voice leading lines (e.g., walking bass).
@@ -711,8 +716,8 @@ mod tests {
 
     #[test]
     fn test_lib_build_scale_c_major() {
-        let scale = build_scale(Note::C, ScaleType::Major);
-        let expected = vec![
+        let scale: Vec<Note> = build_scale(Note::C, ScaleType::Major);
+        let expected: Vec<Note> = vec![
             Note::C,
             Note::D,
             Note::E,
@@ -726,8 +731,8 @@ mod tests {
 
     #[test]
     fn test_lib_build_scale_a_harmonic_minor() {
-        let scale = build_scale(Note::A, ScaleType::MinorHarmonic);
-        let expected = vec![
+        let scale: Vec<Note> = build_scale(Note::A, ScaleType::MinorHarmonic);
+        let expected: Vec<Note> = vec![
             Note::A,
             Note::B,
             Note::C,
@@ -741,15 +746,15 @@ mod tests {
 
     #[test]
     fn test_lib_build_chord_a_minor() {
-        let chord = build_chord(Note::A, ChordType::Minor);
-        let expected = vec![Note::A, Note::C, Note::E];
+        let chord: Vec<Note> = build_chord(Note::A, ChordType::Minor);
+        let expected: Vec<Note> = vec![Note::A, Note::C, Note::E];
         assert_eq!(chord, expected);
     }
 
     #[test]
     fn test_lib_build_chord_b_diminished() {
-        let chord = build_chord(Note::B, ChordType::Diminished);
-        let expected = vec![Note::B, Note::D, Note::F];
+        let chord: Vec<Note> = build_chord(Note::B, ChordType::Diminished);
+        let expected: Vec<Note> = vec![Note::B, Note::D, Note::F];
         assert_eq!(chord, expected);
     }
 
@@ -758,8 +763,8 @@ mod tests {
         // Try the logic that gave us problems (Minor)
         // A (9) -> C (0) = 3 semitones
         // A (9) -> E (4) = 7 semitones
-        let third_interval = (Note::C.as_u8() + 12 - Note::A.as_u8()) % 12;
-        let fifth_interval = (Note::E.as_u8() + 12 - Note::A.as_u8()) % 12;
+        let third_interval: u8 = (Note::C.as_u8() + 12 - Note::A.as_u8()) % 12;
+        let fifth_interval: u8 = (Note::E.as_u8() + 12 - Note::A.as_u8()) % 12;
         assert_eq!(third_interval, 3);
         assert_eq!(fifth_interval, 7);
         assert_eq!(
@@ -770,8 +775,8 @@ mod tests {
         // Test the logic (Diminished)
         // B (11) -> D (2) = 3 semitones
         // B (11) -> F (5) = 6 semitones
-        let third_interval_b = (Note::D.as_u8() + 12 - Note::B.as_u8()) % 12;
-        let fifth_interval_b = (Note::F.as_u8() + 12 - Note::B.as_u8()) % 12;
+        let third_interval_b: u8 = (Note::D.as_u8() + 12 - Note::B.as_u8()) % 12;
+        let fifth_interval_b: u8 = (Note::F.as_u8() + 12 - Note::B.as_u8()) % 12;
         assert_eq!(third_interval_b, 3);
         assert_eq!(fifth_interval_b, 6);
         assert_eq!(
@@ -782,13 +787,16 @@ mod tests {
 
     #[test]
     fn test_lib_harmonize_c_major() {
-        let scale = build_scale(Note::C, ScaleType::Major);
-        let harmony = harmonize_scale(&scale, false);
+        let scale: Vec<Note> = build_scale(Note::C, ScaleType::Major);
+        let harmony: Vec<HarmonizedDegree> = harmonize_scale(&scale, false);
 
         // We extract only the qualities of the chords
-        let qualities: Vec<ChordType> = harmony.iter().map(|d| d.chord_type).collect();
+        let qualities: Vec<ChordType> = harmony
+            .iter()
+            .map(|d: &HarmonizedDegree| d.chord_type)
+            .collect();
 
-        let expected_qualities = vec![
+        let expected_qualities: Vec<ChordType> = vec![
             ChordType::Major,
             ChordType::Minor,
             ChordType::Minor,
@@ -803,12 +811,15 @@ mod tests {
 
     #[test]
     fn test_lib_harmonize_c_harmonic_minor() {
-        let scale = build_scale(Note::C, ScaleType::MinorHarmonic);
-        let harmony = harmonize_scale(&scale, false);
+        let scale: Vec<Note> = build_scale(Note::C, ScaleType::MinorHarmonic);
+        let harmony: Vec<HarmonizedDegree> = harmonize_scale(&scale, false);
 
-        let qualities: Vec<ChordType> = harmony.iter().map(|d| d.chord_type).collect();
+        let qualities: Vec<ChordType> = harmony
+            .iter()
+            .map(|d: &HarmonizedDegree| d.chord_type)
+            .collect();
 
-        let expected_qualities = vec![
+        let expected_qualities: Vec<ChordType> = vec![
             ChordType::Minor,
             ChordType::Diminished,
             ChordType::Augmented,
@@ -823,27 +834,30 @@ mod tests {
 
     #[test]
     fn test_lib_build_chord_sevenths() {
-        let chord = build_chord(Note::C, ChordType::Major7);
-        let expected = vec![Note::C, Note::E, Note::G, Note::B];
+        let chord: Vec<Note> = build_chord(Note::C, ChordType::Major7);
+        let expected: Vec<Note> = vec![Note::C, Note::E, Note::G, Note::B];
         assert_eq!(chord, expected);
 
-        let chord = build_chord(Note::G, ChordType::Dominant7);
-        let expected = vec![Note::G, Note::B, Note::D, Note::F];
+        let chord: Vec<Note> = build_chord(Note::G, ChordType::Dominant7);
+        let expected: Vec<Note> = vec![Note::G, Note::B, Note::D, Note::F];
         assert_eq!(chord, expected);
 
-        let chord = build_chord(Note::A, ChordType::Minor7);
-        let expected = vec![Note::A, Note::C, Note::E, Note::G];
+        let chord: Vec<Note> = build_chord(Note::A, ChordType::Minor7);
+        let expected: Vec<Note> = vec![Note::A, Note::C, Note::E, Note::G];
         assert_eq!(chord, expected);
     }
 
     #[test]
     fn test_lib_harmonize_c_major_sevenths() {
-        let scale = build_scale(Note::C, ScaleType::Major);
-        let harmony = harmonize_scale(&scale, true); // true for 7mas
+        let scale: Vec<Note> = build_scale(Note::C, ScaleType::Major);
+        let harmony: Vec<HarmonizedDegree> = harmonize_scale(&scale, true); // true for 7mas
 
-        let qualities: Vec<ChordType> = harmony.iter().map(|d| d.chord_type).collect();
+        let qualities: Vec<ChordType> = harmony
+            .iter()
+            .map(|d: &HarmonizedDegree| d.chord_type)
+            .collect();
 
-        let expected_qualities = vec![
+        let expected_qualities: Vec<ChordType> = vec![
             ChordType::Major7,
             ChordType::Minor7,
             ChordType::Minor7,
@@ -858,10 +872,10 @@ mod tests {
 
     #[test]
     fn test_lib_get_inversions() {
-        let chord = vec![Note::C, Note::E, Note::G];
-        let inversions = get_inversions(&chord);
+        let chord: Vec<Note> = vec![Note::C, Note::E, Note::G];
+        let inversions: Vec<Vec<Note>> = get_inversions(&chord);
 
-        let expected = vec![
+        let expected: Vec<Vec<Note>> = vec![
             vec![Note::C, Note::E, Note::G], // Root
             vec![Note::E, Note::G, Note::C], // 1st
             vec![Note::G, Note::C, Note::E], // 2nd
@@ -870,10 +884,10 @@ mod tests {
         assert_eq!(inversions, expected);
 
         // Try a 7th chord
-        let chord_7 = vec![Note::G, Note::B, Note::D, Note::F];
-        let inversions_7 = get_inversions(&chord_7);
+        let chord_7: Vec<Note> = vec![Note::G, Note::B, Note::D, Note::F];
+        let inversions_7: Vec<Vec<Note>> = get_inversions(&chord_7);
 
-        let expected_7 = vec![
+        let expected_7: Vec<Vec<Note>> = vec![
             vec![Note::G, Note::B, Note::D, Note::F], // Root
             vec![Note::B, Note::D, Note::F, Note::G], // 1st
             vec![Note::D, Note::F, Note::G, Note::B], // 2nd
@@ -886,27 +900,34 @@ mod tests {
     #[test]
     fn test_lib_build_scale_pentatonic() {
         // C Major Pentatonic: C, D, E, G, A
-        let scale = build_scale(Note::C, ScaleType::PentatonicMajor);
-        let expected = vec![Note::C, Note::D, Note::E, Note::G, Note::A];
+        let scale: Vec<Note> = build_scale(Note::C, ScaleType::PentatonicMajor);
+        let expected: Vec<Note> = vec![Note::C, Note::D, Note::E, Note::G, Note::A];
         assert_eq!(scale, expected);
 
         // A Minor Pentatonic: A, C, D, E, G
-        let scale = build_scale(Note::A, ScaleType::PentatonicMinor);
-        let expected = vec![Note::A, Note::C, Note::D, Note::E, Note::G];
+        let scale: Vec<Note> = build_scale(Note::A, ScaleType::PentatonicMinor);
+        let expected: Vec<Note> = vec![Note::A, Note::C, Note::D, Note::E, Note::G];
         assert_eq!(scale, expected);
     }
 
     #[test]
     fn test_lib_build_block_progression_fsharp() {
-        let progression = build_progression(Note::FSharp, HarmonicFormula::Block);
+        let progression: Vec<ProgressionChord> =
+            build_progression(Note::FSharp, HarmonicFormula::Block);
 
-        let roots: Vec<Note> = progression.iter().map(|c| c.root_note).collect();
+        let roots: Vec<Note> = progression
+            .iter()
+            .map(|c: &ProgressionChord| c.root_note)
+            .collect();
         assert_eq!(
             roots,
             vec![Note::FSharp, Note::CSharp, Note::FSharp, Note::B]
         );
 
-        let types: Vec<ChordType> = progression.iter().map(|c| c.chord_type).collect();
+        let types: Vec<ChordType> = progression
+            .iter()
+            .map(|c: &ProgressionChord| c.chord_type)
+            .collect();
         assert_eq!(
             types,
             vec![
@@ -941,14 +962,21 @@ mod tests {
 
     #[test]
     fn test_lib_build_circle_progression_c_major() {
-        let progression = build_progression(Note::C, HarmonicFormula::Circle);
+        let progression: Vec<ProgressionChord> =
+            build_progression(Note::C, HarmonicFormula::Circle);
 
         // Check the roots: C, A, D, G
-        let roots: Vec<Note> = progression.iter().map(|c| c.root_note).collect();
+        let roots: Vec<Note> = progression
+            .iter()
+            .map(|c: &ProgressionChord| c.root_note)
+            .collect();
         assert_eq!(roots, vec![Note::C, Note::A, Note::D, Note::G]);
 
         // Check the types: Major, Minor, Minor, Dominant7
-        let types: Vec<ChordType> = progression.iter().map(|c| c.chord_type).collect();
+        let types: Vec<ChordType> = progression
+            .iter()
+            .map(|c: &ProgressionChord| c.chord_type)
+            .collect();
         assert_eq!(
             types,
             vec![
@@ -973,13 +1001,20 @@ mod tests {
 
     #[test]
     fn test_lib_build_guajira_progression_c() {
-        let progression = build_progression(Note::C, HarmonicFormula::Guajira);
+        let progression: Vec<ProgressionChord> =
+            build_progression(Note::C, HarmonicFormula::Guajira);
 
         // I, IV, V7
-        let roots: Vec<Note> = progression.iter().map(|c| c.root_note).collect();
+        let roots: Vec<Note> = progression
+            .iter()
+            .map(|c: &ProgressionChord| c.root_note)
+            .collect();
         assert_eq!(roots, vec![Note::C, Note::F, Note::G]);
 
-        let types: Vec<ChordType> = progression.iter().map(|c| c.chord_type).collect();
+        let types: Vec<ChordType> = progression
+            .iter()
+            .map(|c: &ProgressionChord| c.chord_type)
+            .collect();
         assert_eq!(
             types,
             vec![ChordType::Major, ChordType::Major, ChordType::Dominant7]
@@ -988,14 +1023,21 @@ mod tests {
 
     #[test]
     fn test_lib_build_minor_block_progression_c() {
-        let progression = build_progression(Note::C, HarmonicFormula::MinorBlock);
+        let progression: Vec<ProgressionChord> =
+            build_progression(Note::C, HarmonicFormula::MinorBlock);
 
         // vi, VI7, ii, III7
         // C Major -> A, A, D, E
-        let roots: Vec<Note> = progression.iter().map(|c| c.root_note).collect();
+        let roots: Vec<Note> = progression
+            .iter()
+            .map(|c: &ProgressionChord| c.root_note)
+            .collect();
         assert_eq!(roots, vec![Note::A, Note::A, Note::D, Note::E]);
 
-        let types: Vec<ChordType> = progression.iter().map(|c| c.chord_type).collect();
+        let types: Vec<ChordType> = progression
+            .iter()
+            .map(|c: &ProgressionChord| c.chord_type)
+            .collect();
         assert_eq!(
             types,
             vec![

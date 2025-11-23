@@ -190,9 +190,9 @@ pub fn get_scale_notes(root: FfiNote, scale_type: FfiScaleType) -> Vec<FfiNote> 
     let core_root: Note = root.into();
     let core_scale: ScaleType = scale_type.into();
 
-    let notes = build_scale(core_root, core_scale);
+    let notes: Vec<Note> = build_scale(core_root, core_scale);
 
-    notes.into_iter().map(FfiNote::from).collect()
+    notes.into_iter().map(|n: Note| FfiNote::from(n)).collect()
 }
 
 #[uniffi::export]
@@ -200,9 +200,9 @@ pub fn get_chord_notes(root: FfiNote, chord_type: FfiChordType) -> Vec<FfiNote> 
     let core_root: Note = root.into();
     let core_chord: ChordType = chord_type.into();
 
-    let notes = build_chord(core_root, core_chord);
+    let notes: Vec<Note> = build_chord(core_root, core_chord);
 
-    notes.into_iter().map(FfiNote::from).collect()
+    notes.into_iter().map(|n: Note| FfiNote::from(n)).collect()
 }
 
 #[uniffi::export]
@@ -214,17 +214,23 @@ pub fn get_harmonization(
     let core_root: Note = root.into();
     let core_scale: ScaleType = scale_type.into();
 
-    let scale_notes = build_scale(core_root, core_scale);
-    let harmony = harmonize_scale(&scale_notes, sevenths);
+    let scale_notes: Vec<Note> = build_scale(core_root, core_scale);
+    let harmony: Vec<tonic_music_core::HarmonizedDegree> = harmonize_scale(&scale_notes, sevenths);
 
     harmony
         .into_iter()
-        .map(|h| FfiHarmonizedDegree {
-            degree: h.degree as u32,
-            root_note: h.root_note.into(),
-            chord_type: h.chord_type.into(),
-            notes: h.notes.into_iter().map(FfiNote::from).collect(),
-        })
+        .map(
+            |h: tonic_music_core::HarmonizedDegree| FfiHarmonizedDegree {
+                degree: h.degree as u32,
+                root_note: h.root_note.into(),
+                chord_type: h.chord_type.into(),
+                notes: h
+                    .notes
+                    .into_iter()
+                    .map(|n: Note| FfiNote::from(n))
+                    .collect(),
+            },
+        )
         .collect()
 }
 
@@ -233,16 +239,23 @@ pub fn get_progression(root: FfiNote, formula: FfiHarmonicFormula) -> Vec<FfiPro
     let core_root: Note = root.into();
     let core_formula: HarmonicFormula = formula.into();
 
-    let progression = build_progression(core_root, core_formula);
+    let progression: Vec<tonic_music_core::ProgressionChord> =
+        build_progression(core_root, core_formula);
 
     progression
         .into_iter()
-        .map(|p| FfiProgressionChord {
-            degree: p.degree,
-            root_note: p.root_note.into(),
-            chord_type: p.chord_type.into(),
-            notes: p.notes.into_iter().map(FfiNote::from).collect(),
-        })
+        .map(
+            |p: tonic_music_core::ProgressionChord| FfiProgressionChord {
+                degree: p.degree,
+                root_note: p.root_note.into(),
+                chord_type: p.chord_type.into(),
+                notes: p
+                    .notes
+                    .into_iter()
+                    .map(|n: Note| FfiNote::from(n))
+                    .collect(),
+            },
+        )
         .collect()
 }
 
@@ -256,29 +269,38 @@ pub fn get_custom_progression(
     // Split by whitespace or dashes
     let parts: Vec<&str> = formula_str
         .split(|c: char| c.is_whitespace() || c == '-')
-        .filter(|s| !s.is_empty())
+        .filter(|s: &&str| !s.is_empty())
         .collect();
 
-    let mut parsed_chords = Vec::new();
+    let mut parsed_chords: Vec<tonic_music_core::parser::ParsedRomanChord> = Vec::new();
 
     for part in parts {
+        let part: &str = part;
         // Parse each chord string
-        let parsed = parse_roman_chord(part).map_err(|e| FfiError::Generic {
-            val: format!("Failed to parse '{}': {}", part, e),
-        })?;
+        let parsed: tonic_music_core::parser::ParsedRomanChord =
+            parse_roman_chord(part).map_err(|e: String| FfiError::Generic {
+                val: format!("Failed to parse '{}': {}", part, e),
+            })?;
         parsed_chords.push(parsed);
     }
 
-    let progression = build_custom_progression(core_root, parsed_chords);
+    let progression: Vec<tonic_music_core::ProgressionChord> =
+        build_custom_progression(core_root, parsed_chords);
 
     Ok(progression
         .into_iter()
-        .map(|p| FfiProgressionChord {
-            degree: p.degree,
-            root_note: p.root_note.into(),
-            chord_type: p.chord_type.into(),
-            notes: p.notes.into_iter().map(FfiNote::from).collect(),
-        })
+        .map(
+            |p: tonic_music_core::ProgressionChord| FfiProgressionChord {
+                degree: p.degree,
+                root_note: p.root_note.into(),
+                chord_type: p.chord_type.into(),
+                notes: p
+                    .notes
+                    .into_iter()
+                    .map(|n: Note| FfiNote::from(n))
+                    .collect(),
+            },
+        )
         .collect())
 }
 
@@ -288,7 +310,7 @@ mod tests {
 
     #[test]
     fn test_scale_generation() {
-        let notes = get_scale_notes(FfiNote::C, FfiScaleType::Major);
+        let notes: Vec<FfiNote> = get_scale_notes(FfiNote::C, FfiScaleType::Major);
         assert_eq!(notes.len(), 7);
         // C Major: C, D, E, F, G, A, B
         assert!(matches!(notes[0], FfiNote::C));
@@ -297,7 +319,7 @@ mod tests {
 
     #[test]
     fn test_chord_generation() {
-        let notes = get_chord_notes(FfiNote::C, FfiChordType::Major);
+        let notes: Vec<FfiNote> = get_chord_notes(FfiNote::C, FfiChordType::Major);
         assert_eq!(notes.len(), 3);
         // C Major Triad: C, E, G
         assert!(matches!(notes[0], FfiNote::C));
@@ -307,7 +329,8 @@ mod tests {
 
     #[test]
     fn test_harmonization() {
-        let harmony = get_harmonization(FfiNote::C, FfiScaleType::Major, false);
+        let harmony: Vec<FfiHarmonizedDegree> =
+            get_harmonization(FfiNote::C, FfiScaleType::Major, false);
         assert_eq!(harmony.len(), 7);
         // I degree is C Major
         assert!(matches!(harmony[0].root_note, FfiNote::C));
@@ -316,7 +339,8 @@ mod tests {
 
     #[test]
     fn test_progression_minor_block() {
-        let progression = get_progression(FfiNote::C, FfiHarmonicFormula::MinorBlock);
+        let progression: Vec<FfiProgressionChord> =
+            get_progression(FfiNote::C, FfiHarmonicFormula::MinorBlock);
         assert_eq!(progression.len(), 4);
 
         // Expected: vi (Am), VI7 (A7), ii (Dm), III7 (E7)
