@@ -1,6 +1,6 @@
 [package]
 name = "tonic-music-core"
-version = "2.2.0"
+version = "3.0.0"
 edition = "2024"
 description = "Core music theory logic library"
 license = "AGPL-3.0"

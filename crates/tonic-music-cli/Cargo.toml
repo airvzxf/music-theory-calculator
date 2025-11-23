@@ -1,6 +1,6 @@
 [package]
 name = "tonic-music-cli"
-version = "2.2.0"
+version = "3.0.0"
 edition = "2024"
 description = "CLI for tonic-music music theory calculator"
 license = "AGPL-3.0"

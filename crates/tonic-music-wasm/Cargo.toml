@@ -1,6 +1,6 @@
 [package]
 name = "tonic-music-wasm"
-version = "2.2.0"
+version = "3.0.0"
 edition = "2024"
 description = "WebAssembly bindings for tonic-music"
 license = "AGPL-3.0"
