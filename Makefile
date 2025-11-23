@@ -26,17 +26,22 @@ serve: wasm
 	@echo "Serving demo at http://localhost:8000"
 	cd crates/tonic-music-wasm && python3 -m http.server 8000
 
-# Generate FFI Bindings and sync to apps
+# Generate FFI Bindings (Release) and sync to apps
 bindings:
 	./scripts/generate_bindings.sh
 
-# Build Android Debug APK
-android-build: bindings
+# Generate FFI Bindings (Debug)
+bindings-debug:
+	./scripts/generate_bindings.sh --debug
+
+# Build Android Debug APK (uses Debug bindings)
+android-build: bindings-debug
 	cd apps/android && ./gradlew assembleDebug
 
-# Build Android Release Bundle (AAB)
+# Build Android Release Bundle (AAB) (uses Release bindings)
 android-release: bindings
 	cd apps/android && ./gradlew bundleRelease
+	@echo "App Bundle created at: apps/android/app/build/outputs/bundle/release/app-release.aab"
 
 # Clean build artifacts
 clean:

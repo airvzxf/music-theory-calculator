@@ -1,11 +1,31 @@
 #!/bin/bash
 set -e
 
+# Default to release
+BUILD_TYPE="release"
+CARGO_FLAGS="--release"
+
+# Parse arguments
+for arg in "$@"
+do
+    case $arg in
+        --debug)
+        BUILD_TYPE="debug"
+        CARGO_FLAGS=""
+        ;;
+    esac
+done
+
 # Define paths
 PROJECT_ROOT=$(git rev-parse --show-toplevel)
 TARGET_DIR="$PROJECT_ROOT/target"
 BINDINGS_DIR="$PROJECT_ROOT/bindings"
-FFI_LIB_PATH="$TARGET_DIR/debug/libtonic_music_ffi.so"
+# Adjust FFI lib path based on build type
+if [ "$BUILD_TYPE" == "debug" ]; then
+    FFI_LIB_PATH="$TARGET_DIR/debug/libtonic_music_ffi.so"
+else
+    FFI_LIB_PATH="$TARGET_DIR/release/libtonic_music_ffi.so"
+fi
 
 # App Directories (Monorepo structure)
 ANDROID_APP_DIR="$PROJECT_ROOT/apps/android"
@@ -14,8 +34,8 @@ IOS_APP_DIR="$PROJECT_ROOT/apps/ios"
 # Ensure we are at the root
 cd "$PROJECT_ROOT"
 
-echo "=== Building FFI Crate ==="
-cargo build -p tonic-music-ffi
+echo "=== Building FFI Crate ($BUILD_TYPE) ==="
+cargo build -p tonic-music-ffi $CARGO_FLAGS
 
 echo ""
 echo "=== Generating Bindings ==="
@@ -63,7 +83,7 @@ if [ -d "$ANDROID_APP_DIR" ]; then
 
   # Check for cargo-ndk and build native libraries
   if command -v cargo-ndk &>/dev/null; then
-    echo "-> Detected cargo-ndk. Building and syncing native libraries..."
+    echo "-> Detected cargo-ndk. Building and syncing native libraries ($BUILD_TYPE)..."
 
     # Determine target directory for jniLibs
     JNI_LIBS_TARGET=""
@@ -72,15 +92,19 @@ if [ -d "$ANDROID_APP_DIR" ]; then
     else
       # Fallback to standard path if not found
       JNI_LIBS_TARGET="$ANDROID_APP_DIR/app/src/main/jniLibs"
-      mkdir -p "$JNI_LIBS_TARGET"
     fi
+
+    # Clean the target directory to ensure no stale libs
+    echo "   Cleaning $JNI_LIBS_TARGET..."
+    rm -rf "$JNI_LIBS_TARGET"
+    mkdir -p "$JNI_LIBS_TARGET"
 
     echo "   Outputting .so files to: $JNI_LIBS_TARGET"
 
     # Build for common architectures (arm64, armv7, x86_64 for emulator)
     cargo ndk -t arm64-v8a -t armeabi-v7a -t x86_64 \
       -o "$JNI_LIBS_TARGET" \
-      build --release -p tonic-music-ffi
+      build $CARGO_FLAGS -p tonic-music-ffi
   else
     echo "-> WARNING: cargo-ndk not found. Skipping native library build."
     echo "   Please install: cargo install cargo-ndk"

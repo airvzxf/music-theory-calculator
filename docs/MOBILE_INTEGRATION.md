@@ -36,8 +36,14 @@ music-theory-calculator/
 
 We use a script to generate bindings and automatically build/copy the native libraries to your app folders.
 
+**For Release (Default):**
 ```bash
 ./scripts/generate_bindings.sh
+```
+
+**For Debug (Faster compilation, debug symbols):**
+```bash
+./scripts/generate_bindings.sh --debug
 ```
 
 The script will:
