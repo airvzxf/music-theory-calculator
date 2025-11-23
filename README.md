@@ -223,7 +223,7 @@ tonic-music progression --root C --formula minor-block
 ```text
 --- C MinorBlock Progression ---
 vi:     A m     -> [C, E, A]
-IV7:    F 7     -> [C, D#, F, A]
+VI7:    A 7     -> [C#, E, G, A]
 ii:     D m     -> [D, F, A]
 III7:   E 7     -> [D, E, G#, B]
 ```

@@ -313,4 +313,20 @@ mod tests {
         assert!(matches!(harmony[0].root_note, FfiNote::C));
         assert!(matches!(harmony[0].chord_type, FfiChordType::Major));
     }
+
+    #[test]
+    fn test_progression_minor_block() {
+        let progression = get_progression(FfiNote::C, FfiHarmonicFormula::MinorBlock);
+        assert_eq!(progression.len(), 4);
+
+        // Expected: vi (Am), VI7 (A7), ii (Dm), III7 (E7)
+        // Roots: A, A, D, E
+        assert!(matches!(progression[0].root_note, FfiNote::A));
+        assert!(matches!(progression[1].root_note, FfiNote::A));
+        assert!(matches!(progression[2].root_note, FfiNote::D));
+        assert!(matches!(progression[3].root_note, FfiNote::E));
+
+        // Check types for the changed chord (2nd chord)
+        assert!(matches!(progression[1].chord_type, FfiChordType::Dominant7));
+    }
 }

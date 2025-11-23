@@ -659,7 +659,7 @@ fn get_guajira_progression_spec(root: Note) -> Vec<(String, Note, ChordType)> {
     ]
 }
 
-/// Returns the chord specifications for the vi-IV7-ii-III7 "Relative Minor Block" progression.
+/// Returns the chord specifications for the vi-VI7-ii-III7 "Relative Minor Block" progression.
 fn get_minor_block_progression_spec(root: Note) -> Vec<(String, Note, ChordType)> {
     vec![
         (
@@ -668,8 +668,8 @@ fn get_minor_block_progression_spec(root: Note) -> Vec<(String, Note, ChordType)
             ChordType::Minor,
         ),
         (
-            "IV7".to_string(),
-            transpose(root, Interval::PerfectFourth),
+            "VI7".to_string(),
+            transpose(root, Interval::MajorSixth),
             ChordType::Dominant7,
         ),
         (
@@ -990,10 +990,10 @@ mod tests {
     fn test_lib_build_minor_block_progression_c() {
         let progression = build_progression(Note::C, HarmonicFormula::MinorBlock);
 
-        // vi, IV7, ii, III7
-        // C Major -> A, F, D, E
+        // vi, VI7, ii, III7
+        // C Major -> A, A, D, E
         let roots: Vec<Note> = progression.iter().map(|c| c.root_note).collect();
-        assert_eq!(roots, vec![Note::A, Note::F, Note::D, Note::E]);
+        assert_eq!(roots, vec![Note::A, Note::A, Note::D, Note::E]);
 
         let types: Vec<ChordType> = progression.iter().map(|c| c.chord_type).collect();
         assert_eq!(
