@@ -16,6 +16,10 @@ jobs:
     - uses: actions/checkout@v4
     - name: Install Rust toolchain
       uses: dtolnay/rust-toolchain@stable
+    - name: Calculate Cargo.lock hash
+      id: cargo-lock-hash
+      shell: bash
+      run: echo "hash=$(git hash-object Cargo.lock)" >> $GITHUB_OUTPUT
     - name: Cache dependencies
       uses: actions/cache@v4
       with:
@@ -23,7 +27,7 @@ jobs:
           ~/.cargo/registry
           ~/.cargo/git
           target
-        key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+        key: ${{ runner.os }}-cargo-${{ steps.cargo-lock-hash.outputs.hash }}
     - name: Check formatting
       run: cargo fmt -- --check
     - name: Run clippy
@@ -36,6 +40,10 @@ jobs:
     - uses: actions/checkout@v4
     - name: Install Rust toolchain
       uses: dtolnay/rust-toolchain@stable
+    - name: Calculate Cargo.lock hash
+      id: cargo-lock-hash
+      shell: bash
+      run: echo "hash=$(git hash-object Cargo.lock)" >> $GITHUB_OUTPUT
     - name: Cache dependencies
       uses: actions/cache@v4
       with:
@@ -43,7 +51,7 @@ jobs:
           ~/.cargo/registry
           ~/.cargo/git
           target
-        key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+        key: ${{ runner.os }}-cargo-${{ steps.cargo-lock-hash.outputs.hash }}
     - name: Build
       run: cargo build --verbose
 
@@ -57,6 +65,10 @@ jobs:
     - uses: actions/checkout@v4
     - name: Install Rust toolchain
       uses: dtolnay/rust-toolchain@stable
+    - name: Calculate Cargo.lock hash
+      id: cargo-lock-hash
+      shell: bash
+      run: echo "hash=$(git hash-object Cargo.lock)" >> $GITHUB_OUTPUT
     - name: Cache dependencies
       uses: actions/cache@v4
       with:
@@ -64,7 +76,7 @@ jobs:
           ~/.cargo/registry
           ~/.cargo/git
           target
-        key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+        key: ${{ runner.os }}-cargo-${{ steps.cargo-lock-hash.outputs.hash }}
     - name: Run tests
       run: cargo test --verbose
 
@@ -75,6 +87,10 @@ jobs:
     - uses: actions/checkout@v4
     - name: Install Rust toolchain
       uses: dtolnay/rust-toolchain@stable
+    - name: Calculate Cargo.lock hash
+      id: cargo-lock-hash
+      shell: bash
+      run: echo "hash=$(git hash-object Cargo.lock)" >> $GITHUB_OUTPUT
     - name: Cache dependencies
       uses: actions/cache@v4
       with:
@@ -82,7 +98,7 @@ jobs:
           ~/.cargo/registry
           ~/.cargo/git
           target
-        key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+        key: ${{ runner.os }}-cargo-${{ steps.cargo-lock-hash.outputs.hash }}
     - name: Cache cargo-audit
       uses: actions/cache@v4
       with:
@@ -105,6 +121,10 @@ jobs:
       uses: dtolnay/rust-toolchain@stable
       with:
         toolchain: '1.85.0'
+    - name: Calculate Cargo.lock hash
+      id: cargo-lock-hash
+      shell: bash
+      run: echo "hash=$(git hash-object Cargo.lock)" >> $GITHUB_OUTPUT
     - name: Cache dependencies
       uses: actions/cache@v4
       with:
@@ -112,7 +132,7 @@ jobs:
           ~/.cargo/registry
           ~/.cargo/git
           target
-        key: ${{ runner.os }}-cargo-msrv-${{ hashFiles('**/Cargo.lock') }}
+        key: ${{ runner.os }}-cargo-msrv-${{ steps.cargo-lock-hash.outputs.hash }}
     - name: Build with MSRV
       run: cargo build --verbose
 
@@ -123,6 +143,10 @@ jobs:
     - uses: actions/checkout@v4
     - name: Install Rust toolchain
       uses: dtolnay/rust-toolchain@stable
+    - name: Calculate Cargo.lock hash
+      id: cargo-lock-hash
+      shell: bash
+      run: echo "hash=$(git hash-object Cargo.lock)" >> $GITHUB_OUTPUT
     - name: Cache dependencies
       uses: actions/cache@v4
       with:
@@ -130,7 +154,7 @@ jobs:
           ~/.cargo/registry
           ~/.cargo/git
           target
-        key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+        key: ${{ runner.os }}-cargo-${{ steps.cargo-lock-hash.outputs.hash }}
     - name: Test with no default features
       run: cargo test --no-default-features --verbose
     - name: Test with all features
@@ -143,6 +167,10 @@ jobs:
     - uses: actions/checkout@v4
     - name: Install Rust toolchain
       uses: dtolnay/rust-toolchain@stable
+    - name: Calculate Cargo.lock hash
+      id: cargo-lock-hash
+      shell: bash
+      run: echo "hash=$(git hash-object Cargo.lock)" >> $GITHUB_OUTPUT
     - name: Cache dependencies
       uses: actions/cache@v4
       with:
@@ -150,7 +178,7 @@ jobs:
           ~/.cargo/registry
           ~/.cargo/git
           target
-        key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+        key: ${{ runner.os }}-cargo-${{ steps.cargo-lock-hash.outputs.hash }}
     - name: Check documentation
       run: RUSTDOCFLAGS="-D warnings" cargo doc --no-deps
 
