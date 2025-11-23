@@ -248,13 +248,17 @@ jobs:
           ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
         run: ./gradlew assembleRelease bundleRelease
 
+      - name: Prepare Android Artifacts
+        run: |
+          mkdir -p android-dist
+          cp apps/android/app/build/outputs/apk/release/app-release.apk android-dist/
+          cp apps/android/app/build/outputs/bundle/release/app-release.aab android-dist/
+
       - name: Upload Android Release Assets
         uses: actions/upload-artifact@v4
         with:
           name: android-release-assets
-          path: |
-            apps/android/app/build/outputs/apk/release/app-release.apk
-            apps/android/app/build/outputs/bundle/release/app-release.aab
+          path: android-dist/*
 
   create-tag-and-release:
     permissions:
@@ -281,7 +285,7 @@ jobs:
             artifacts/release-assets-macOS/tonic-music-macOS.tar.gz
             artifacts/release-assets-Windows/tonic-music-Windows.exe
             artifacts/web-assets/tonic-music-web.tar.gz
-            artifacts/android-release-assets/app-release.apk
-            artifacts/android-release-assets/app-release.aab
+            artifacts/android-release-assets/*.apk
+            artifacts/android-release-assets/*.aab
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
