@@ -186,11 +186,80 @@ jobs:
           name: web-assets
           path: ${{ env.ASSET_PATH }}
 
+  build-android-release:
+    name: build-android-release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-linux-android armv7-linux-androideabi x86_64-linux-android
+
+      - name: Calculate Cargo.lock hash
+        id: cargo-lock-hash
+        shell: bash
+        run: echo "hash=$(git hash-object Cargo.lock)" >> $GITHUB_OUTPUT
+      - name: Cache dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-android-cargo-${{ steps.cargo-lock-hash.outputs.hash }}
+          restore-keys: |
+            ${{ runner.os }}-android-cargo-
+
+      - name: Cache cargo-ndk
+        id: cache-cargo-ndk
+        uses: actions/cache@v4
+        with:
+          path: ~/.cargo/bin/cargo-ndk
+          key: ${{ runner.os }}-cargo-ndk-v4.1.2
+      - name: Install cargo-ndk
+        if: steps.cache-cargo-ndk.outputs.cache-hit != 'true'
+        run: cargo install cargo-ndk --version 4.1.2
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Generate Bindings & Libs
+        run: ./scripts/generate_bindings.sh
+
+      - name: Decode Keystore
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+        run: |
+          echo "$ANDROID_KEYSTORE_BASE64" | base64 --decode > apps/android/app/release.jks
+
+      - name: Build Android Release
+        working-directory: apps/android
+        env:
+          ANDROID_KEYSTORE_FILE: ${{ github.workspace }}/apps/android/app/release.jks
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: ./gradlew assembleRelease bundleRelease
+
+      - name: Upload Android Release Assets
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-release-assets
+          path: |
+            apps/android/app/build/outputs/apk/release/app-release.apk
+            apps/android/app/build/outputs/bundle/release/app-release.aab
+
   create-tag-and-release:
     permissions:
       contents: write
     name: create-tag-and-release
-    needs: [create-release-body, build-release, build-wasm-release]
+    needs: [create-release-body, build-release, build-wasm-release, build-android-release]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -211,5 +280,7 @@ jobs:
             artifacts/release-assets-macOS/tonic-music-macOS.tar.gz
             artifacts/release-assets-Windows/tonic-music-Windows.exe
             artifacts/web-assets/tonic-music-web.tar.gz
+            artifacts/android-release-assets/app-release.apk
+            artifacts/android-release-assets/app-release.aab
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
