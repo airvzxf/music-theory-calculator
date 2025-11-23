@@ -22,28 +22,29 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      
+
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
         with:
           targets: wasm32-unknown-unknown
-      
+
       - name: Install wasm-pack
         run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
-      
+
       - name: Build Wasm
         run: wasm-pack build --target web
         working-directory: crates/tonic-music-wasm
-      
+
       - name: Setup Pages
         uses: actions/configure-pages@v4
-      
+
       - name: Prepare artifacts
         run: |
           mkdir -p dist
           cp crates/tonic-music-wasm/index.html dist/
+          cp crates/tonic-music-wasm/favicon.ico dist/
           cp -r crates/tonic-music-wasm/pkg dist/
-      
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
