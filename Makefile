@@ -1,49 +1,41 @@
 # Makefile for Tonic Music Calculator
 
-.PHONY: all build test clean wasm serve
+.PHONY: help all build release test wasm serve bindings bindings-debug android-build android-release clean
 
-# Default target
-all: build
+help: ## List all available commands
+	@grep -E '^[a-zA-Z0-9_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
 
-# Build CLI and Core
-build:
+all: build ## Default target
+
+build: ## Build CLI and Core
 	cargo build --workspace
 
-# Build Release version of CLI
-release:
+release: ## Build Release version of CLI
 	cargo build --release -p tonic-music-cli
 
-# Run tests
-test:
+test: ## Run tests
 	cargo test --workspace
 
-# Build Wasm module
-wasm:
+wasm: ## Build Wasm module
 	cd crates/tonic-music-wasm && wasm-pack build --target web
 
-# Serve Wasm Demo (requires python3)
-serve: wasm
+serve: wasm ## Serve Wasm Demo (requires python3)
 	@echo "Serving demo at http://localhost:8000"
 	cd crates/tonic-music-wasm && python3 -m http.server 8000
 
-# Generate FFI Bindings (Release) and sync to apps
-bindings:
+bindings: ## Generate FFI Bindings (Release) and sync to apps
 	./scripts/generate_bindings.sh
 
-# Generate FFI Bindings (Debug)
-bindings-debug:
+bindings-debug: ## Generate FFI Bindings (Debug)
 	./scripts/generate_bindings.sh --debug
 
-# Build Android Debug APK (uses Debug bindings)
-android-build: bindings-debug
+android-build: bindings-debug ## Build Android Debug APK (uses Debug bindings)
 	cd apps/android && ./gradlew assembleDebug
 
-# Build Android Release Bundle (AAB) (uses Release bindings)
-android-release: bindings
+android-release: bindings ## Build Android Release Bundle (AAB) (uses Release bindings)
 	cd apps/android && ./gradlew bundleRelease
 	@echo "App Bundle created at: apps/android/app/build/outputs/bundle/release/app-release.aab"
 
-# Clean build artifacts
-clean:
+clean: ## Clean build artifacts
 	cargo clean
 	rm -rf crates/tonic-music-wasm/pkg
