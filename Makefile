@@ -36,6 +36,11 @@ android-release: bindings ## Build Android Release Bundle (AAB) (uses Release bi
 	cd apps/android && ./gradlew bundleRelease
 	@echo "App Bundle created at: apps/android/app/build/outputs/bundle/release/app-release.aab"
 
-clean: ## Clean build artifacts
-	cargo clean
-	rm -rf crates/tonic-music-wasm/pkg
+# Patterns to exclude from cleaning (preserve configurations)
+GIT_CLEAN_EXCLUDES := -e '!.idea' -e '!**/.idea/**' -e '!local.properties' -e '!.env' -e '!*.iml' -e '!*.jks' -e '!*.keystore' -e '!google-services.json'
+
+clean: ## Deep clean: Remove all ignored files (builds, artifacts) except configurations
+	git clean -Xfd $(GIT_CLEAN_EXCLUDES)
+
+clean-dry: ## Dry run: Show what would be cleaned without deleting anything
+	git clean -n -Xfd $(GIT_CLEAN_EXCLUDES)
