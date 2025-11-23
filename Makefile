@@ -26,6 +26,18 @@ serve: wasm
 	@echo "Serving demo at http://localhost:8000"
 	cd crates/tonic-music-wasm && python3 -m http.server 8000
 
+# Generate FFI Bindings and sync to apps
+bindings:
+	./scripts/generate_bindings.sh
+
+# Build Android Debug APK
+android-build: bindings
+	cd apps/android && ./gradlew assembleDebug
+
+# Build Android Release Bundle (AAB)
+android-release: bindings
+	cd apps/android && ./gradlew bundleRelease
+
 # Clean build artifacts
 clean:
 	cargo clean

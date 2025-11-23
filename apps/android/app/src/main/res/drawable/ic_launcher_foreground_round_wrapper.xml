@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- 
+      Wrapper for the Round Version
+      Applies padding to ensure the circular logo fits safely within the mask.
+    -->
+    <item
+        android:drawable="@drawable/ic_launcher_round_data"
+        android:top="22dp"
+        android:bottom="22dp"
+        android:left="22dp"
+        android:right="22dp" />
+</layer-list>

@@ -26,6 +26,15 @@ Ensure you have Rust and Cargo installed.
     cargo install --path crates/tonic-music-cli
     ```
 
+## 📱 Mobile Apps
+
+This project is a Monorepo containing the core logic and mobile applications.
+
+*   **Android:** `apps/android` (Kotlin + Jetpack Compose)
+*   **iOS:** `apps/ios` (Swift + SwiftUI)
+
+For detailed setup and development instructions, see [docs/MOBILE_INTEGRATION.md](docs/MOBILE_INTEGRATION.md).
+
 ## 🌐 Web App
 
 This project includes a WebAssembly (Wasm) version that runs directly in your browser.

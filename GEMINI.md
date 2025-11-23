@@ -39,6 +39,12 @@ This project is a command-line music theory calculator named `tonic-music`. It i
 The project is structured as a **Cargo Workspace** with two main crates:
 *   `crates/tonic-music-core`: The pure library crate containing all music theory logic and data structures (`Note`, `ScaleType`, `ChordType`). It has minimal dependencies.
 *   `crates/tonic-music-cli`: The binary crate that handles command-line argument parsing using `clap` and formatting.
+*   `crates/tonic-music-ffi`: The FFI (Foreign Function Interface) crate that exposes the core logic to other languages (Kotlin/Swift) using `uniffi`.
+
+It also includes mobile applications and integration scripts:
+*   `apps/android`: The Android application (Kotlin/Jetpack Compose).
+*   `apps/ios`: The iOS application (Swift/SwiftUI).
+*   `scripts/generate_bindings.sh`: A utility script to build the FFI crate, generate bindings, and sync them to the mobile app directories.
 
 ## Building and Running
 
@@ -46,6 +52,7 @@ The project is structured as a **Cargo Workspace** with two main crates:
 
 -   Rust and Cargo
 -   `wasm-pack` (for WebAssembly build): `cargo install wasm-pack`
+-   `cargo-ndk` (for Android FFI build): `cargo install cargo-ndk`
 
 ### Building and Installation
 

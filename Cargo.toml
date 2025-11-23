@@ -3,5 +3,6 @@ members = [
     "crates/tonic-music-core",
     "crates/tonic-music-cli",
     "crates/tonic-music-wasm",
+    "crates/tonic-music-ffi",
 ]
 resolver = "2"

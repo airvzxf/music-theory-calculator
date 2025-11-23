@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- 
+      Splash Screen Specific Wrapper
+      Uses larger padding (36dp) to force the logo smaller (36dp size)
+      ensuring it fits completely within any mask the Splash Screen applies.
+      (108 - 36 - 36 = 36dp logo size)
+    -->
+    <item
+        android:drawable="@drawable/ic_launcher_round_data"
+        android:top="36dp"
+        android:bottom="36dp"
+        android:left="36dp"
+        android:right="36dp" />
+</layer-list>

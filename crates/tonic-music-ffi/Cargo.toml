@@ -1,0 +1,16 @@
+[package]
+name = "tonic-music-ffi"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib"]
+name = "tonic_music_ffi"
+
+[dependencies]
+thiserror = "2.0.17"
+tonic-music-core = { path = "../tonic-music-core" }
+uniffi = { version = "0.28", features = ["cli"] }
+
+[build-dependencies]
+uniffi = { version = "0.28", features = ["build"] }
