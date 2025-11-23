@@ -1,7 +1,8 @@
 use tonic_music_core::parser::parse_roman_chord;
+use tonic_music_core::{ChordType, HarmonicFormula, Note, ScaleType};
+// Logic
 use tonic_music_core::{
-    ChordType, HarmonicFormula, Note, ScaleType, build_chord, build_custom_progression,
-    build_progression, build_scale, harmonize_scale,
+    build_chord, build_custom_progression, build_progression, build_scale, harmonize_scale,
 };
 
 #[derive(Debug, thiserror::Error, uniffi::Error)]
