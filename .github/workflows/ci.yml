@@ -206,13 +206,36 @@ jobs:
       uses: dtolnay/rust-toolchain@stable
       with:
         targets: aarch64-linux-android armv7-linux-androideabi x86_64-linux-android
+    - name: Calculate Cargo.lock hash
+      id: cargo-lock-hash
+      shell: bash
+      run: echo "hash=$(git hash-object Cargo.lock)" >> $GITHUB_OUTPUT
+    - name: Cache dependencies
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.cargo/registry
+          ~/.cargo/git
+          target
+        key: ${{ runner.os }}-android-cargo-${{ steps.cargo-lock-hash.outputs.hash }}
+        restore-keys: |
+          ${{ runner.os }}-android-cargo-
+    - name: Cache cargo-ndk
+      id: cache-cargo-ndk
+      uses: actions/cache@v4
+      with:
+        path: ~/.cargo/bin/cargo-ndk
+        key: ${{ runner.os }}-cargo-ndk-v4.1.2
     - name: Install cargo-ndk
-      run: cargo install cargo-ndk
+      if: steps.cache-cargo-ndk.outputs.cache-hit != 'true'
+      run: cargo install cargo-ndk --version 4.1.2
     - name: Set up JDK 17
       uses: actions/setup-java@v4
       with:
         java-version: '17'
         distribution: 'temurin'
+    - name: Setup Gradle
+      uses: gradle/actions/setup-gradle@v4
     - name: Generate Bindings & Libs
       run: ./scripts/generate_bindings.sh
     - name: Build Android APK
