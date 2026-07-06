@@ -14,15 +14,15 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v7
+    - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
     - name: Install Rust toolchain
-      uses: dtolnay/rust-toolchain@stable
+      uses: dtolnay/rust-toolchain@4be7066ada62dd38de10e7b70166bc74ed198c30 # stable
     - name: Calculate Cargo.lock hash
       id: cargo-lock-hash
       shell: bash
       run: echo "hash=$(git hash-object Cargo.lock)" >> $GITHUB_OUTPUT
     - name: Cache dependencies
-      uses: actions/cache@v6
+      uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
       with:
         path: |
           ~/.cargo/registry
@@ -38,15 +38,15 @@ jobs:
     needs: lint
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v7
+    - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
     - name: Install Rust toolchain
-      uses: dtolnay/rust-toolchain@stable
+      uses: dtolnay/rust-toolchain@4be7066ada62dd38de10e7b70166bc74ed198c30 # stable
     - name: Calculate Cargo.lock hash
       id: cargo-lock-hash
       shell: bash
       run: echo "hash=$(git hash-object Cargo.lock)" >> $GITHUB_OUTPUT
     - name: Cache dependencies
-      uses: actions/cache@v6
+      uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
       with:
         path: |
           ~/.cargo/registry
@@ -63,15 +63,15 @@ jobs:
       matrix:
         os: [windows-latest, macos-latest, ubuntu-latest]
     steps:
-    - uses: actions/checkout@v7
+    - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
     - name: Install Rust toolchain
-      uses: dtolnay/rust-toolchain@stable
+      uses: dtolnay/rust-toolchain@4be7066ada62dd38de10e7b70166bc74ed198c30 # stable
     - name: Calculate Cargo.lock hash
       id: cargo-lock-hash
       shell: bash
       run: echo "hash=$(git hash-object Cargo.lock)" >> $GITHUB_OUTPUT
     - name: Cache dependencies
-      uses: actions/cache@v6
+      uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
       with:
         path: |
           ~/.cargo/registry
@@ -85,15 +85,15 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v7
+    - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
     - name: Install Rust toolchain
-      uses: dtolnay/rust-toolchain@stable
+      uses: dtolnay/rust-toolchain@4be7066ada62dd38de10e7b70166bc74ed198c30 # stable
     - name: Calculate Cargo.lock hash
       id: cargo-lock-hash
       shell: bash
       run: echo "hash=$(git hash-object Cargo.lock)" >> $GITHUB_OUTPUT
     - name: Cache dependencies
-      uses: actions/cache@v6
+      uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
       with:
         path: |
           ~/.cargo/registry
@@ -101,7 +101,7 @@ jobs:
           target
         key: ${{ runner.os }}-cargo-${{ steps.cargo-lock-hash.outputs.hash }}
     - name: Cache cargo-audit
-      uses: actions/cache@v6
+      uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
       with:
         path: ~/.cargo/bin/cargo-audit
         key: ${{ runner.os }}-cargo-audit
@@ -117,9 +117,9 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v7
+    - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
     - name: Install Rust MSRV
-      uses: dtolnay/rust-toolchain@stable
+      uses: dtolnay/rust-toolchain@4be7066ada62dd38de10e7b70166bc74ed198c30 # stable
       with:
         toolchain: '1.85.0'
     - name: Calculate Cargo.lock hash
@@ -127,7 +127,7 @@ jobs:
       shell: bash
       run: echo "hash=$(git hash-object Cargo.lock)" >> $GITHUB_OUTPUT
     - name: Cache dependencies
-      uses: actions/cache@v6
+      uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
       with:
         path: |
           ~/.cargo/registry
@@ -141,15 +141,15 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v7
+    - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
     - name: Install Rust toolchain
-      uses: dtolnay/rust-toolchain@stable
+      uses: dtolnay/rust-toolchain@4be7066ada62dd38de10e7b70166bc74ed198c30 # stable
     - name: Calculate Cargo.lock hash
       id: cargo-lock-hash
       shell: bash
       run: echo "hash=$(git hash-object Cargo.lock)" >> $GITHUB_OUTPUT
     - name: Cache dependencies
-      uses: actions/cache@v6
+      uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
       with:
         path: |
           ~/.cargo/registry
@@ -165,15 +165,15 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v7
+    - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
     - name: Install Rust toolchain
-      uses: dtolnay/rust-toolchain@stable
+      uses: dtolnay/rust-toolchain@4be7066ada62dd38de10e7b70166bc74ed198c30 # stable
     - name: Calculate Cargo.lock hash
       id: cargo-lock-hash
       shell: bash
       run: echo "hash=$(git hash-object Cargo.lock)" >> $GITHUB_OUTPUT
     - name: Cache dependencies
-      uses: actions/cache@v6
+      uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
       with:
         path: |
           ~/.cargo/registry
@@ -187,9 +187,9 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v7
+    - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
     - name: Install Rust with Wasm target
-      uses: dtolnay/rust-toolchain@stable
+      uses: dtolnay/rust-toolchain@4be7066ada62dd38de10e7b70166bc74ed198c30 # stable
       with:
         targets: wasm32-unknown-unknown
     - name: Install wasm-pack
@@ -202,9 +202,9 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v7
+    - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
     - name: Install Rust toolchain
-      uses: dtolnay/rust-toolchain@stable
+      uses: dtolnay/rust-toolchain@4be7066ada62dd38de10e7b70166bc74ed198c30 # stable
       with:
         targets: aarch64-linux-android armv7-linux-androideabi x86_64-linux-android
     - name: Calculate Cargo.lock hash
@@ -212,7 +212,7 @@ jobs:
       shell: bash
       run: echo "hash=$(git hash-object Cargo.lock)" >> $GITHUB_OUTPUT
     - name: Cache dependencies
-      uses: actions/cache@v6
+      uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
       with:
         path: |
           ~/.cargo/registry
@@ -223,7 +223,7 @@ jobs:
           ${{ runner.os }}-android-cargo-
     - name: Cache cargo-ndk
       id: cache-cargo-ndk
-      uses: actions/cache@v6
+      uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
       with:
         path: ~/.cargo/bin/cargo-ndk
         key: ${{ runner.os }}-cargo-ndk-v4.1.2
@@ -231,12 +231,12 @@ jobs:
       if: steps.cache-cargo-ndk.outputs.cache-hit != 'true'
       run: cargo install cargo-ndk --version 4.1.2
     - name: Set up JDK 17
-      uses: actions/setup-java@v5
+      uses: actions/setup-java@1bcf9fb12cf4aa7d266a90ae39939e61372fe520 # v5.4.0
       with:
         java-version: '17'
         distribution: 'temurin'
     - name: Setup Gradle
-      uses: gradle/actions/setup-gradle@v6
+      uses: gradle/actions/setup-gradle@3f131e8634966bd73d06cc69884922b02e6faf92 # v6.2.0
     - name: Generate Bindings & Libs
       run: ./scripts/generate_bindings.sh
     - name: Build Android APK
