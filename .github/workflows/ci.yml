@@ -121,7 +121,7 @@ jobs:
     - name: Install Rust MSRV
       uses: dtolnay/rust-toolchain@4be7066ada62dd38de10e7b70166bc74ed198c30 # stable
       with:
-        toolchain: '1.85.0'
+        toolchain: '1.91.0'
     - name: Calculate Cargo.lock hash
       id: cargo-lock-hash
       shell: bash

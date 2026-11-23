@@ -2,6 +2,7 @@
 name = "tonic-music-core"
 version = "3.0.0"
 edition = "2024"
+rust-version = "1.91"
 description = "Core music theory logic library"
 license = "AGPL-3.0"
 
