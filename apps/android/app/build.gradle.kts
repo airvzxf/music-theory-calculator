@@ -19,7 +19,7 @@ android {
 
     defaultConfig {
         applicationId = "net.rovisoft.tonicmusic"
-        minSdk = 23
+        minSdk = 24
         targetSdk = 36
         versionCode = 5
         versionName = "3.0.0"
