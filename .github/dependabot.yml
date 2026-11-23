@@ -16,8 +16,8 @@ updates:
       prefix: "ci"
     labels: ["dependencies", "ci"]
 
-  # Rust workspace (Cargo.lock at the root). The msrv-check CI job catches
-  # any update that needs a newer Rust than the supported minimum.
+  # Rust workspace (Cargo.lock at the root). The MSRV-aware resolver and the
+  # msrv-check CI job catch updates that need a newer Rust than the minimum.
   - package-ecosystem: "cargo"
     directory: "/"
     schedule:

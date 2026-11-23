@@ -5,4 +5,4 @@ members = [
     "crates/tonic-music-wasm",
     "crates/tonic-music-ffi",
 ]
-resolver = "2"
+resolver = "3"

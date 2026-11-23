@@ -2,6 +2,7 @@
 name = "tonic-music-wasm"
 version = "3.0.0"
 edition = "2024"
+rust-version = "1.91"
 description = "WebAssembly bindings for tonic-music"
 license = "AGPL-3.0"
 

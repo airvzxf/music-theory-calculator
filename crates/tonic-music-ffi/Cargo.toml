@@ -2,6 +2,7 @@
 name = "tonic-music-ffi"
 version = "3.0.0"
 edition = "2021"
+rust-version = "1.91"
 
 [lib]
 crate-type = ["cdylib"]
@@ -11,6 +12,3 @@ name = "tonic_music_ffi"
 thiserror = "2.0.17"
 tonic-music-core = { path = "../tonic-music-core" }
 uniffi = { version = "0.30.0", features = ["cli"] }
-
-[build-dependencies]
-uniffi = { version = "0.30.0", features = ["build"] }
