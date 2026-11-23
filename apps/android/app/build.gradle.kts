@@ -1,6 +1,5 @@
 plugins {
     alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
 }
 
@@ -13,7 +12,7 @@ kotlin {
 android {
     namespace = "net.rovisoft.tonicmusic"
     compileSdk {
-        version = release(36)
+        version = release(37)
     }
 
     defaultConfig {
