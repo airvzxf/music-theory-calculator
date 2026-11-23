@@ -101,7 +101,7 @@ dependencies {
     implementation("androidx.core:core-splashscreen:1.2.0")
 
     // UniFFI depends on JNA - Explicitly using AAR to include native libraries
-    implementation("net.java.dev.jna:jna:5.18.1@aar")
+    implementation("net.java.dev.jna:jna:5.19.1@aar")
 }
 
 // --- Custom Task: Package Native Debug Symbols ---
