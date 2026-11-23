@@ -1,6 +1,5 @@
 plugins {
     alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
 }
 
@@ -13,12 +12,14 @@ kotlin {
 android {
     namespace = "net.rovisoft.tonicmusic"
     compileSdk {
-        version = release(36)
+        version = release(37) {
+            minorApiLevel = 2
+        }
     }
 
     defaultConfig {
         applicationId = "net.rovisoft.tonicmusic"
-        minSdk = 23
+        minSdk = 24
         targetSdk = 36
         versionCode = 5
         versionName = "3.0.0"
@@ -67,12 +68,6 @@ android {
     buildFeatures {
         compose = true
     }
-    sourceSets {
-        getByName("main") {
-            jniLibs.srcDirs("src/main/jniLibs")
-        }
-    }
-
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
