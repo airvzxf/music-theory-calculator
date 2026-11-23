@@ -15,3 +15,28 @@ updates:
     commit-message:
       prefix: "ci"
     labels: ["dependencies", "ci"]
+
+  # Rust workspace (Cargo.lock at the root). The msrv-check CI job catches
+  # any update that needs a newer Rust than the supported minimum.
+  - package-ecosystem: "cargo"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    groups:
+      cargo-minor-patch:
+        update-types: ["minor", "patch"]
+    commit-message:
+      prefix: "build(deps)"
+    labels: ["dependencies", "rust"]
+
+  # Android app: version catalog, Gradle plugins and the Gradle wrapper.
+  - package-ecosystem: "gradle"
+    directory: "/apps/android"
+    schedule:
+      interval: "weekly"
+    groups:
+      android-minor-patch:
+        update-types: ["minor", "patch"]
+    commit-message:
+      prefix: "build(deps)"
+    labels: ["dependencies", "android"]
